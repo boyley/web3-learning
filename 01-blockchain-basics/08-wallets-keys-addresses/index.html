@@ -54,7 +54,6 @@
       // 从同一助记词按 BIP44 标准路径派生多个账户，展示「一词生多址」
       const tbody = document.querySelector("#derived tbody");
       tbody.innerHTML = "";
-      const node = ethers.HDNodeWallet.fromPhrase(w.mnemonic.phrase); // m
       for (let i = 0; i < 3; i++) {
         const path = `m/44'/60'/0'/0/${i}`;
         const child = ethers.HDNodeWallet.fromPhrase(w.mnemonic.phrase, "", path);

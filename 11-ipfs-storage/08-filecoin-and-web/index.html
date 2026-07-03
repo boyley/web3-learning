@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>08 · Filecoin 与去中心化 Web 生态</title>
+  <style>
+    body { font-family: -apple-system, "PingFang SC", sans-serif; max-width: 820px; margin: 32px auto; padding: 0 16px; line-height: 1.7; color: #222; }
+    h1 { font-size: 22px; } h2 { font-size: 17px; margin-top: 26px; border-left: 4px solid #3172d4; padding-left: 10px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0; }
+    .card { border: 1px solid #e2e2e2; border-radius: 10px; padding: 14px 16px; background: #fafafa; }
+    .card h3 { margin: 0 0 6px; font-size: 15px; }
+    table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 13px; }
+    th, td { border: 1px solid #e0e0e0; padding: 8px 10px; text-align: left; vertical-align: top; }
+    th { background: #f4f6f8; }
+    code { background: #eef1f4; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+    .note { background: #fff8e1; border: 1px solid #ffe08a; border-radius: 8px; padding: 10px 14px; font-size: 14px; }
+    @media (max-width: 600px){ .grid{ grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <h1>🗄️ Filecoin 与去中心化 Web 生态</h1>
+  <p>IPFS 解决了「内容怎么寻址、怎么分发」，但没解决「谁出钱保证它长期不丢」。<b>Filecoin</b> 在 IPFS 之上加了一层<b>经济激励</b>：客户付费，存储提供者用密码学证明「我确实一直存着你的数据」，存不好就<b>没收抵押</b>。这是本页的静态讲解，无需联网。</p>
+
+  <h2>IPFS vs Filecoin：分工</h2>
+  <table>
+    <thead><tr><th>维度</th><th>IPFS</th><th>Filecoin</th></tr></thead>
+    <tbody>
+      <tr><td>本质</td><td>P2P 内容寻址 + 分发协议</td><td>去中心化存储【市场】+ 区块链</td></tr>
+      <tr><td>解决什么</td><td>「内容是什么 / 怎么取」</td><td>「谁来长期存、凭什么信他没删」</td></tr>
+      <tr><td>激励</td><td>无（靠自愿 pin）</td><td>有（付费 + 抵押 + 罚没）</td></tr>
+      <tr><td>持久性保证</td><td>弱（没人 pin 就消失）</td><td>强（存储交易 + 每日时空证明）</td></tr>
+      <tr><td>寻址</td><td>CID</td><td>同样用 CID（多数 Filecoin 节点也是 IPFS 节点）</td></tr>
+    </tbody>
+  </table>
+  <div class="note">一句话：<b>IPFS 负责「找到内容」，Filecoin 负责「保证内容一直在」。</b>两者互补，常一起用。</div>
+
+  <h2>Filecoin 怎么保证「没删你的数据」</h2>
+  <div class="grid">
+    <div class="card"><h3>💰 存储交易（Storage Deal）</h3>客户和存储提供者（SP）在链上达成交易：存多大、存多久、多少钱。SP 需<b>锁定 FIL 抵押</b>。</div>
+    <div class="card"><h3>🔐 复制证明 PoRep</h3>SP 首次存入时证明「我确实为你的数据生成了独立的物理副本」，防止假装存了。</div>
+    <div class="card"><h3>⏱️ 时空证明 PoSt</h3>SP 需<b>持续、每天</b>提交密码学证明，表明数据一直在。漏证/造假 → <b>抵押被罚没</b>。</div>
+    <div class="card"><h3>📥 检索（Retrieval）</h3>取回数据可走 IPFS/网关，或走 Filecoin 检索市场；数据用 CID 寻址，和 IPFS 一致。</div>
+  </div>
+
+  <h2>去中心化 Web（dWeb）拼图</h2>
+  <table>
+    <thead><tr><th>层</th><th>技术</th><th>作用</th></tr></thead>
+    <tbody>
+      <tr><td>寻址 / 分发</td><td><b>IPFS</b>（CID）</td><td>内容寻址、P2P 取内容</td></tr>
+      <tr><td>可变命名</td><td><b>IPNS / DNSLink</b></td><td>固定名字指向可更新内容</td></tr>
+      <tr><td>持久化激励</td><td><b>Filecoin</b></td><td>付费存储 + 证明 + 罚没，长期不丢</td></tr>
+      <tr><td>易用上链坡道</td><td><b>Storacha / Pinata / Filebase</b></td><td>一个 API 把文件同时 pin 到 IPFS 并存进 Filecoin</td></tr>
+      <tr><td>身份 / 资产</td><td>以太坊等公链</td><td>链上只存 <code>ipfs://CID</code>，数据在 IPFS/Filecoin</td></tr>
+    </tbody>
+  </table>
+
+  <h2>典型分层实践（把本合集串起来）</h2>
+  <div class="note">
+    NFT / dApp 常见做法：<br/>
+    ① 图片 + 元数据 → 上传并 pin 到 <b>Pinata/Storacha</b>（保证随时可取，模块 05/06）<br/>
+    ② 重要资产再让服务把它落进 <b>Filecoin</b> 存储交易（长期归档、经济担保，本模块）<br/>
+    ③ 链上合约 <code>tokenURI</code> 只存 <b>ipfs://CID</b>（省 gas、不可篡改，模块 06）<br/>
+    → <b>热数据靠 IPFS pin 快速可取，冷/重要数据靠 Filecoin 长期兜底。</b>
+  </div>
+
+  <p style="margin-top:22px; color:#666; font-size:13px">
+    本页为静态讲解页，双击即可打开，无需联网或安装。想动手：先跑 05 模块把文件 pin 到 Pinata，再研究把 CID 落进 Filecoin 的服务（Storacha / Filebase）。
+  </p>
+</body>
+</html>

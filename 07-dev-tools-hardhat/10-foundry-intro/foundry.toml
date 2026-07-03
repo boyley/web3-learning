@@ -1,0 +1,17 @@
+# ============================================================================
+# foundry.toml —— Foundry 的配置文件（相当于 Hardhat 的 hardhat.config.js）
+# 官方文档：https://book.getfoundry.sh/config/
+# ============================================================================
+[profile.default]
+src = "src"          # 合约源码目录
+out = "out"          # 编译产物目录（相当于 artifacts/）
+libs = ["lib"]       # 依赖库目录（forge install 会把依赖放这里）
+solc = "0.8.28"      # Solidity 编译器版本
+optimizer = true     # 开启优化器
+optimizer_runs = 200
+
+# 连测试网/主网时可配 rpc_endpoints 与 etherscan（这里仅示例，值放 .env）
+# [rpc_endpoints]
+# sepolia = "${SEPOLIA_RPC_URL}"
+# [etherscan]
+# sepolia = { key = "${ETHERSCAN_API_KEY}" }

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>10 · Etherscan 区块浏览器 · 链接生成 + 对照学习</title>
+  <!-- 纯前端、无外部依赖：浏览器直接打开即可运行 -->
+  <style>
+    body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+           max-width: 860px; margin: 24px auto; padding: 0 16px; line-height: 1.7; color: #222; }
+    h1 { font-size: 22px; }
+    h2 { font-size: 17px; margin-top: 28px; border-left: 4px solid #6c7ae0; padding-left: 8px; }
+    .card { border: 1px solid #e2e5ee; border-radius: 10px; padding: 16px; margin: 12px 0; background: #fafbff; }
+    input, select { font-size: 14px; padding: 8px; border: 1px solid #ccd; border-radius: 6px; }
+    input[type=text] { width: 100%; box-sizing: border-box; margin: 6px 0; }
+    button { font-size: 14px; padding: 8px 16px; border: none; border-radius: 6px;
+             background: #6c7ae0; color: #fff; cursor: pointer; }
+    button:hover { background: #5563d6; }
+    a { color: #5563d6; word-break: break-all; }
+    table { border-collapse: collapse; width: 100%; font-size: 13px; margin-top: 8px; }
+    th, td { border: 1px solid #e2e5ee; padding: 6px 8px; text-align: left; }
+    th { background: #eef1fb; }
+    .out { margin-top: 10px; font-size: 14px; }
+    .warn { background: #fff6f6; border-color: #f0c0c0; }
+    code { background: #eef; padding: 1px 5px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>10 · Etherscan 区块浏览器 · 链接生成 + 对照学习</h1>
+  <p>本工具帮你把「交易哈希 / 地址」变成可点击的 Etherscan 链接，并对照说明页面上每一栏对应链上的什么概念。
+     纯前端、无需联网安装、不需要私钥。</p>
+
+  <h2>① 生成 Etherscan 链接</h2>
+  <div class="card">
+    <label>选择网络：
+      <select id="network">
+        <option value="https://sepolia.etherscan.io" selected>Sepolia 测试网（推荐）</option>
+        <option value="https://etherscan.io">以太坊主网</option>
+      </select>
+    </label>
+    <input type="text" id="query" placeholder="粘贴交易哈希(0x...64位) 或 地址(0x...40位)" />
+    <button onclick="genLink()">生成链接</button>
+    <div class="out" id="result"></div>
+  </div>
+
+  <h2>② 真实示例（Sepolia，点开实操）</h2>
+  <div class="card">
+    <ul>
+      <li>地址示例：
+        <a target="_blank" href="https://sepolia.etherscan.io/address/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045">
+        0xd8dA...6045</a>（看 Balance / Transactions）</li>
+      <li>合约示例（WETH，已验证）：
+        <a target="_blank" href="https://sepolia.etherscan.io/address/0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14#code">
+        0xfFf9...6B14 #code</a>（看 Contract → Read/Write）</li>
+      <li>最新区块列表：
+        <a target="_blank" href="https://sepolia.etherscan.io/blocks">sepolia.etherscan.io/blocks</a></li>
+    </ul>
+  </div>
+
+  <h2>③ 交易详情页 · 栏目对照表</h2>
+  <div class="card">
+    <table>
+      <tr><th>Etherscan 栏目</th><th>对应链上概念（见对应模块）</th></tr>
+      <tr><td>Transaction Hash</td><td>交易唯一 ID（03 交易）</td></tr>
+      <tr><td>Status</td><td>成功/失败 = 收据 status（03）</td></tr>
+      <tr><td>Block / Confirmations</td><td>所在区块 + 确认数（06 区块）</td></tr>
+      <tr><td>From / To</td><td>发送方 / 接收方，To 是合约会标名（02 账户）</td></tr>
+      <tr><td>Value</td><td>转账 ETH 数量（08 单位）</td></tr>
+      <tr><td>Transaction Fee</td><td>手续费 = gasUsed × 单价（04 Gas）</td></tr>
+      <tr><td>Gas Price / Base / Priority</td><td>EIP-1559 单价拆解（04 Gas）</td></tr>
+      <tr><td>Nonce</td><td>发送方交易序号（02/03）</td></tr>
+      <tr><td>Input Data</td><td>调用合约的 data：函数选择器+参数（09 RPC）</td></tr>
+      <tr><td>Logs / Tokens Transferred</td><td>合约发出的事件日志</td></tr>
+    </table>
+  </div>
+
+  <div class="card warn">
+    ⚠️ 安全提示：只用官方域名 <code>etherscan.io</code> / <code>sepolia.etherscan.io</code>。
+    区块浏览器只是「看数据」，<b>正常浏览绝不需要你签名或连接钱包授权</b>——遇到要你签名的「浏览器」就是钓鱼。
+    合约显示 Verified 只代表源码与字节码一致，<b>不代表安全</b>；假币可能冒用知名代币名，务必核对合约地址。
+  </div>
+
+  <script>
+    function genLink() {
+      const base = document.getElementById('network').value;
+      const q = document.getElementById('query').value.trim();
+      const out = document.getElementById('result');
+      if (!q) { out.innerHTML = '请先粘贴交易哈希或地址。'; return; }
+
+      let path, kind;
+      // 交易哈希：0x + 64 位十六进制；地址：0x + 40 位十六进制
+      if (/^0x[0-9a-fA-F]{64}$/.test(q)) { path = '/tx/' + q; kind = '交易(Transaction)'; }
+      else if (/^0x[0-9a-fA-F]{40}$/.test(q)) { path = '/address/' + q; kind = '地址/合约(Address)'; }
+      else { out.innerHTML = '❌ 格式不对：交易哈希应为 0x+64 位，地址应为 0x+40 位十六进制。'; return; }
+
+      const url = base + path;
+      out.innerHTML = `识别为：<b>${kind}</b><br/>` +
+        `<a target="_blank" href="${url}">${url}</a> ` +
+        `<button onclick="window.open('${url}','_blank')">打开</button>`;
+    }
+  </script>
+</body>
+</html>
