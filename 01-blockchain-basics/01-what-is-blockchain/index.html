@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>01 · 区块链是什么 · 去中心化账本 Demo</title>
+  <style>
+    body { font-family: -apple-system, "PingFang SC", sans-serif; max-width: 900px; margin: 24px auto; padding: 0 16px; color: #222; line-height: 1.6; }
+    h1 { font-size: 22px; }
+    .lead { color: #555; }
+    .nodes { display: flex; gap: 12px; flex-wrap: wrap; margin: 16px 0; }
+    .node { flex: 1; min-width: 220px; border: 1px solid #ccc; border-radius: 8px; padding: 10px; background: #fafafa; }
+    .node h3 { margin: 0 0 8px; font-size: 15px; }
+    .block { border: 1px solid #ddd; border-radius: 6px; padding: 8px; margin: 6px 0; font-size: 12px; font-family: monospace; background: #fff; }
+    .block.tampered { border-color: #d33; background: #fff0f0; }
+    .ok { color: #2a8; font-weight: bold; }
+    .bad { color: #d33; font-weight: bold; }
+    button { padding: 8px 14px; margin: 4px 6px 4px 0; border: 1px solid #888; border-radius: 6px; background: #fff; cursor: pointer; }
+    button:hover { background: #f0f0f0; }
+    .hash { color: #888; word-break: break-all; }
+    label { font-size: 13px; }
+    input { padding: 4px; }
+  </style>
+</head>
+<body>
+  <h1>区块链是什么：一个去中心化、可验证、防篡改的共享账本</h1>
+  <p class="lead">
+    下面模拟 3 个互不信任的节点（记账人）各自保存一份<strong>相同的账本</strong>。
+    每条记录都通过哈希与上一条链接。你可以「篡改」某个节点的某条记录，
+    看看它如何被立刻检测出来 —— 这就是「去中心化 + 不可篡改」的直觉。
+  </p>
+
+  <div>
+    <label>新增一笔转账：<input id="txInput" value="Alice → Bob : 5 币" /></label>
+    <button onclick="addRecord()">向全网广播新记录</button>
+    <button onclick="tamperFirst()">😈 篡改 节点C 的第 1 条记录</button>
+    <button onclick="resync()">🔄 从多数节点重新同步（自愈）</button>
+  </div>
+
+  <div class="nodes" id="nodes"></div>
+
+  <p id="status"></p>
+
+  <script>
+    // ===== 纯 JS，无需联网 / 钱包。用浏览器内置 SubtleCrypto 做 SHA-256 =====
+
+    // 一条链就是一串「记录」，每条记录带上一条记录的哈希，从而首尾相连
+    // genesis = 创世记录（链的起点，prevHash 约定为全 0）
+    const GENESIS = { data: "创世块 (Genesis)", prevHash: "0".repeat(16) };
+
+    // 每个节点各存一份完全相同的账本副本 —— 这就是「分布式」
+    let nodes = {
+      A: [structuredClone(GENESIS)],
+      B: [structuredClone(GENESIS)],
+      C: [structuredClone(GENESIS)],
+    };
+
+    // 计算 SHA-256，取前 16 位十六进制便于展示
+    async function sha256(text) {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+      return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("").slice(0, 16);
+    }
+
+    // 给某个节点的链尾追加一条记录：hash = H(本条data + 上一条hash)
+    async function appendTo(chain, data) {
+      const prev = chain[chain.length - 1];
+      const prevHash = prev.hash || (await sha256(prev.data + prev.prevHash));
+      chain.push({ data, prevHash, hash: await sha256(data + prevHash) });
+    }
+
+    // 校验一条链是否完整：重算每条记录的哈希，并检查 prevHash 是否与上一条真实哈希吻合
+    async function verify(chain) {
+      for (let i = 1; i < chain.length; i++) {
+        const prevRealHash = chain[i - 1].hash || (await sha256(chain[i - 1].data + chain[i - 1].prevHash));
+        const expected = await sha256(chain[i].data + chain[i].prevHash);
+        // 两个条件：本条哈希算出来要对；本条记录声明的 prevHash 要等于上一条的真实哈希
+        if (chain[i].hash !== expected || chain[i].prevHash !== prevRealHash) return i;
+      }
+      return -1; // -1 表示整条链都没问题
+    }
+
+    async function addRecord() {
+      const data = document.getElementById("txInput").value.trim() || "空记录";
+      // 广播：每个节点都把这条记录追加到自己的账本
+      for (const k of Object.keys(nodes)) await appendTo(nodes[k], data);
+      render();
+    }
+
+    function tamperFirst() {
+      // 只改 C 节点第 1 条业务记录的内容，但不重算后续哈希 —— 制造一处矛盾
+      if (nodes.C[1]) nodes.C[1].data = "Alice → 攻击者 : 9999 币";
+      render();
+    }
+
+    function resync() {
+      // 简化的「多数决」：A、B 一致且合法，用它覆盖被篡改的 C
+      nodes.C = structuredClone(nodes.A);
+      render();
+    }
+
+    async function render() {
+      const container = document.getElementById("nodes");
+      container.innerHTML = "";
+      let anyBad = false;
+      for (const k of Object.keys(nodes)) {
+        const badIndex = await verify(nodes[k]);
+        if (badIndex !== -1) anyBad = true;
+        const div = document.createElement("div");
+        div.className = "node";
+        div.innerHTML = `<h3>节点 ${k} ${badIndex === -1 ? '<span class="ok">✔ 账本一致</span>' : '<span class="bad">✘ 检测到篡改!</span>'}</h3>`;
+        nodes[k].forEach((b, i) => {
+          const tampered = badIndex !== -1 && i === badIndex;
+          div.innerHTML += `<div class="block ${tampered ? "tampered" : ""}">
+            #${i} ${b.data}<br/>
+            <span class="hash">prev: ${b.prevHash}</span><br/>
+            <span class="hash">hash: ${b.hash || "(genesis)"}</span>
+          </div>`;
+        });
+        container.appendChild(div);
+      }
+      document.getElementById("status").innerHTML = anyBad
+        ? '<span class="bad">全网发现不一致：被篡改的节点会被多数诚实节点识别并拒绝。点「重新同步」即可自愈。</span>'
+        : '<span class="ok">全网账本一致，无人能偷偷改账。</span>';
+    }
+
+    render();
+  </script>
+</body>
+</html>

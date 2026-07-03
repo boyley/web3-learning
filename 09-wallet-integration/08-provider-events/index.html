@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>08 · 监听 Provider 事件 accountsChanged / chainChanged</title>
+<style>
+:root{--bg:#0f1420;--card:#1a2232;--fg:#e6edf3;--muted:#8b98a9;--accent:#f6851b;--ok:#3fb950;--err:#f85149;--border:#2d3648}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--fg);line-height:1.6;padding:24px}
+.wrap{max-width:820px;margin:0 auto}h1{font-size:1.5rem}h2{font-size:1.1rem;border-bottom:1px solid var(--border);padding-bottom:6px;margin-top:28px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin:16px 0}
+button{background:var(--accent);color:#111;border:0;border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer;font-size:.95rem;margin:4px 6px 4px 0}
+button:hover{opacity:.9}button:disabled{opacity:.4;cursor:not-allowed}
+pre{background:#0b0f17;border:1px solid var(--border);border-radius:8px;padding:14px;overflow:auto;font-size:.85rem}
+code{color:var(--accent)}input{background:#0b0f17;border:1px solid var(--border);color:var(--fg);border-radius:6px;padding:8px;font-size:.9rem;width:100%}
+.ok{color:var(--ok)}.err{color:var(--err)}.muted{color:var(--muted)}
+.warn{background:#3a2a12;border:1px solid #7a5a24;border-radius:8px;padding:12px;font-size:.9rem}#log{min-height:120px}
+.badge{display:inline-block;background:#0b0f17;border:1px solid var(--border);border-radius:6px;padding:2px 8px;margin-right:6px}
+</style></head><body><div class="wrap">
+<h1>08 · 监听 Provider 事件（accountsChanged / chainChanged / connect / disconnect）</h1>
+<p class="muted">用户随时可能在钱包里换账户、换网络或断开，dApp 必须监听事件实时同步，而不是只在连接那一刻读一次。</p>
+
+<div class="warn">
+👉 <b>怎么观察？</b>连接后，去 MetaMask 插件里手动<b>切换账户</b>、<b>切换网络（如 Sepolia ↔ 主网）</b>、或在「已连接的网站」里<b>断开本站</b>，回到本页看日志里事件是否实时触发。
+</div>
+
+<div class="card">
+  <h2>① 连接并开始监听</h2>
+  <button id="btnConnect">连接钱包并注册监听</button>
+  <button id="btnOff" disabled>解绑所有监听（removeListener）</button>
+  <p>当前账户：<span class="badge"><code id="acc">未连接</code></span></p>
+  <p>当前网络 chainId：<span class="badge"><code id="chain">-</code></span><span id="chainName" class="muted"></span></p>
+</div>
+
+<div class="card">
+  <h2>② 事件日志</h2>
+  <pre id="log">等待连接...</pre>
+</div>
+</div>
+
+<script>
+/* =========================================================================
+ * 08 · Provider 事件监听（EIP-1193 Events）
+ *
+ * 为什么要监听事件？
+ *  - 连接时你读到的 account / chainId 只是「那一刻」的快照。
+ *  - 用户可以随时在 MetaMask 里换账户、换网络、断开连接。
+ *  - 如果 dApp 不监听，就会拿着过期的账户/网络继续操作，导致查错余额、
+ *    在错误的链上发交易等严重问题。
+ *
+ * EIP-1193 定义的常用事件：
+ *  - accountsChanged(accounts: string[]) 账户变化；空数组 [] = 用户断开/锁定
+ *  - chainChanged(chainId: string)       网络变化；官方建议收到后 reload 页面
+ *  - connect({ chainId })                首次能与链通信时触发
+ *  - disconnect(error)                   与链断开（如网络中断）时触发
+ *
+ * 用 provider.on(event, handler) 绑定，provider.removeListener(event, handler)
+ * 解绑。SPA 里组件卸载时一定要解绑，否则回调堆积造成内存泄漏。
+ * ========================================================================= */
+
+const $ = (id) => document.getElementById(id);
+const provider = window.ethereum;
+
+function log(msg, type) {
+  const cls = type ? ` class="${type}"` : '';
+  const t = new Date().toLocaleTimeString();
+  $('log').innerHTML = `<span${cls}>[${t}] ${msg}</span>\n` + $('log').innerHTML;
+}
+
+if (!provider) {
+  log('未检测到 window.ethereum，请安装 MetaMask 后刷新。', 'err');
+  $('btnConnect').disabled = true;
+} else {
+  log('已检测到 provider。点「连接钱包并注册监听」开始。', 'ok');
+}
+
+// 把 chainId 转成人类可读名字（只列几个常见的）
+function chainName(id) {
+  const map = { '0x1': '以太坊主网', '0xaa36a7': 'Sepolia 测试网' };
+  return map[id] || '(其它网络)';
+}
+
+function setAccount(acc) {
+  $('acc').textContent = acc || '未连接';
+}
+function setChain(id) {
+  $('chain').textContent = id || '-';
+  $('chainName').textContent = id ? chainName(id) : '';
+}
+
+/* ---- 把各个事件的处理函数单独定义，方便之后 removeListener 解绑 ---- */
+
+// 账户变化：注意空数组代表「断开/锁定」
+function onAccountsChanged(accounts) {
+  if (accounts.length === 0) {
+    setAccount(null);
+    log('事件 accountsChanged：收到空数组 [] → 用户已断开连接或锁定钱包。', 'err');
+  } else {
+    setAccount(accounts[0]);
+    log('事件 accountsChanged：当前账户切换为 ' + accounts[0], 'ok');
+  }
+}
+
+// 网络变化：官方建议直接 reload 页面以清空旧链的状态
+function onChainChanged(chainId) {
+  setChain(chainId);
+  log('事件 chainChanged：网络变为 ' + chainId + ' ' + chainName(chainId), 'ok');
+  log('提示：生产环境这里官方建议执行 window.location.reload()，' +
+      '以避免残留旧链的数据。本演示为了不打断观察，特意不 reload。', 'muted');
+}
+
+// connect：Provider 首次能与某条链通信
+function onConnect(info) {
+  log('事件 connect：已能与链通信，chainId = ' + info.chainId, 'ok');
+}
+
+// disconnect：与链断开（通常是网络问题），参数是一个 error 对象
+function onDisconnect(error) {
+  log('事件 disconnect：与链断开，code=' + (error && error.code) +
+      '，message=' + (error && error.message), 'err');
+}
+
+let listening = false;
+
+function registerListeners() {
+  if (listening) return;
+  provider.on('accountsChanged', onAccountsChanged);
+  provider.on('chainChanged', onChainChanged);
+  provider.on('connect', onConnect);
+  provider.on('disconnect', onDisconnect);
+  listening = true;
+  $('btnOff').disabled = false;
+  log('已注册 4 个监听：accountsChanged / chainChanged / connect / disconnect。', 'ok');
+}
+
+function removeListeners() {
+  if (!listening) return;
+  // 必须传入「同一个函数引用」才能正确解绑，所以前面把 handler 独立命名
+  provider.removeListener('accountsChanged', onAccountsChanged);
+  provider.removeListener('chainChanged', onChainChanged);
+  provider.removeListener('connect', onConnect);
+  provider.removeListener('disconnect', onDisconnect);
+  listening = false;
+  $('btnOff').disabled = true;
+  log('已解绑所有监听（removeListener）。现在去钱包切换账户/网络将不再触发日志。', 'muted');
+}
+
+$('btnConnect').onclick = async () => {
+  try {
+    const accounts = await provider.request({ method: 'eth_requestAccounts' });
+    setAccount(accounts[0]);
+    const chainId = await provider.request({ method: 'eth_chainId' });
+    setChain(chainId);
+    log('已连接：' + accounts[0] + '（网络 ' + chainId + '）', 'ok');
+    registerListeners();
+    log('现在去 MetaMask 里切换账户 / 切换网络 / 断开本站，观察事件触发。', 'muted');
+  } catch (e) {
+    if (e.code === 4001) log('你拒绝了连接（error.code=4001）。', 'err');
+    else log('连接失败：' + (e.message || e), 'err');
+  }
+};
+
+$('btnOff').onclick = removeListeners;
+</script>
+</body></html>

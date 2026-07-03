@@ -1,0 +1,16 @@
+{
+  "name": "My NFT #0",
+  "description": "这是一件教学示范用的 NFT，展示 OpenSea 元数据规范里各字段的含义。",
+  "image": "ipfs://bafybeih.../0.png",
+  "external_url": "https://example.com/nft/0",
+  "background_color": "1a1a2e",
+  "animation_url": "ipfs://bafybeih.../0.mp4",
+  "attributes": [
+    { "trait_type": "背景 Background", "value": "星空 Starry" },
+    { "trait_type": "稀有度 Rarity", "value": "传说 Legendary" },
+    { "trait_type": "力量 Power", "value": 87, "max_value": 100 },
+    { "display_type": "boost_percentage", "trait_type": "暴击加成", "value": 20 },
+    { "display_type": "number", "trait_type": "代数 Generation", "value": 1 },
+    { "display_type": "date", "trait_type": "铸造时间", "value": 1704067200 }
+  ]
+}

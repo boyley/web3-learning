@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>04 · 切换 / 添加网络</title>
+<style>
+:root{--bg:#0f1420;--card:#1a2232;--fg:#e6edf3;--muted:#8b98a9;--accent:#f6851b;--ok:#3fb950;--err:#f85149;--border:#2d3648}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--fg);line-height:1.6;padding:24px}
+.wrap{max-width:820px;margin:0 auto}h1{font-size:1.5rem}h2{font-size:1.1rem;border-bottom:1px solid var(--border);padding-bottom:6px;margin-top:28px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin:16px 0}
+button{background:var(--accent);color:#111;border:0;border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer;font-size:.95rem;margin:4px 6px 4px 0}
+button:hover{opacity:.9}button:disabled{opacity:.4;cursor:not-allowed}
+pre{background:#0b0f17;border:1px solid var(--border);border-radius:8px;padding:14px;overflow:auto;font-size:.85rem}
+code{color:var(--accent)}input,textarea{background:#0b0f17;border:1px solid var(--border);color:var(--fg);border-radius:6px;padding:8px;font-size:.9rem;width:100%;font-family:inherit}
+.ok{color:var(--ok)}.err{color:var(--err)}.muted{color:var(--muted)}
+.warn{background:#3a2a12;border:1px solid #7a5a24;border-radius:8px;padding:12px;font-size:.9rem}#log{min-height:60px}
+</style></head><body><div class="wrap"><h1>04 · 切换 / 添加网络（Switch / Add Network）</h1>
+<p class="muted">用 wallet_switchEthereumChain 切换到 Sepolia 测试网；若钱包里没有该网络（错误码 4902），先 wallet_addEthereumChain 添加再切换。</p>
+
+<div class="card">
+  <h2>① 连接钱包</h2>
+  <button id="btnConnect">连接 MetaMask</button>
+  <p class="muted">当前地址：<span id="account">未连接</span></p>
+  <p class="muted">当前网络：<span id="network">-</span>（chainId：<span id="chainId">-</span>）</p>
+</div>
+
+<div class="card">
+  <h2>② 切换 / 添加网络</h2>
+  <button id="btnSwitch" disabled>切换到 Sepolia</button>
+  <button id="btnAdd" disabled>仅添加 Sepolia</button>
+  <p class="muted">"切换到 Sepolia" 会自动处理 4902：链未添加时先 add 再 switch。</p>
+</div>
+
+<div class="card">
+  <h2>运行日志</h2>
+  <pre id="log" class="muted">等待操作…</pre>
+</div>
+
+<div class="warn">
+  ⚠️ 只使用测试网 Sepolia（chainId 11155111 = 0xaa36a7）。切换网络不花 Gas，但请始终确认自己在测试网上操作，避免在主网误发交易。
+</div>
+</div>
+
+<script>
+/* ========================================================================
+ * 模块 04：切换 / 添加网络
+ * 核心 RPC：
+ *   - wallet_switchEthereumChain  切换到指定链（chainId 必须是十六进制字符串）
+ *   - wallet_addEthereumChain     向钱包添加一条新链
+ * 经典模式：先 switch，若抛出错误码 4902（链未添加）则先 add 再 switch。
+ * ======================================================================== */
+
+// Sepolia 测试网的 chainId：十进制 11155111，转成十六进制就是 0xaa36a7。
+// 注意：EIP-3326 规定 chainId 必须以十六进制字符串传入，不能传十进制数字！
+const SEPOLIA_CHAIN_ID = '0xaa36a7';
+
+// wallet_addEthereumChain 需要的完整链参数。
+const SEPOLIA_PARAMS = {
+  chainId: SEPOLIA_CHAIN_ID,
+  chainName: 'Sepolia',
+  nativeCurrency: { name: 'Sepolia Ether', symbol: 'ETH', decimals: 18 },
+  // 这里用公共 RPC；生产中建议换成自己的 Infura/Alchemy 节点（把 YOUR_KEY 换掉）。
+  rpcUrls: ['https://rpc.sepolia.org'],
+  blockExplorerUrls: ['https://sepolia.etherscan.io'],
+};
+
+// 常见 chainId 到网络名的映射，仅用于展示。
+const CHAIN_NAMES = {
+  '0x1': 'Ethereum 主网',
+  '0xaa36a7': 'Sepolia 测试网',
+  '0x5': 'Goerli 测试网（已弃用）',
+};
+
+const $ = (id) => document.getElementById(id);
+const log = (msg, cls = 'muted') => { $('log').className = cls; $('log').textContent = msg; };
+
+// 拿到 EIP-1193 provider（MetaMask 注入到 window.ethereum）。
+const provider = window.ethereum;
+
+// 顶部检测：没有钱包直接提示安装。
+if (!provider) {
+  log('未检测到 window.ethereum，请先安装 MetaMask 浏览器扩展：https://metamask.io/', 'err');
+  document.querySelectorAll('button').forEach((b) => (b.disabled = true));
+}
+
+// 把错误码翻译成中文，方便教学。
+function explainError(err) {
+  const map = {
+    4001: '用户拒绝了请求（4001）',
+    4100: '当前账户未授权此操作（4100）',
+    4200: '钱包不支持该方法（4200）',
+    4902: '目标链尚未添加到钱包（4902）',
+  };
+  const code = err && err.code;
+  return `${map[code] || '错误'}：${err && err.message ? err.message : String(err)}（code=${code}）`;
+}
+
+// 读取并展示当前链信息。
+async function refreshChain() {
+  const chainId = await provider.request({ method: 'eth_chainId' });
+  $('chainId').textContent = chainId;
+  $('network').textContent = CHAIN_NAMES[chainId] || '未知网络';
+}
+
+// 连接钱包：eth_requestAccounts 会弹窗请求授权账户。
+async function connect() {
+  try {
+    const accounts = await provider.request({ method: 'eth_requestAccounts' });
+    $('account').textContent = accounts[0];
+    await refreshChain();
+    $('btnSwitch').disabled = false;
+    $('btnAdd').disabled = false;
+    log('已连接钱包：' + accounts[0], 'ok');
+  } catch (err) {
+    log('连接失败 → ' + explainError(err), 'err');
+  }
+}
+
+// 单纯添加 Sepolia（不切换）。
+async function addSepolia() {
+  await provider.request({
+    method: 'wallet_addEthereumChain',
+    params: [SEPOLIA_PARAMS], // 注意 params 是数组，元素是链参数对象
+  });
+}
+
+// 切换到 Sepolia，内部处理 4902 的经典流程。
+async function switchToSepolia() {
+  try {
+    // 第一步：尝试直接切换。
+    await provider.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: SEPOLIA_CHAIN_ID }], // 只需要 chainId（十六进制）
+    });
+    await refreshChain();
+    log('已切换到 Sepolia ✅', 'ok');
+  } catch (err) {
+    // 第二步：如果错误码是 4902，说明钱包里根本没这条链，需要先添加。
+    if (err && err.code === 4902) {
+      log('钱包未添加 Sepolia（4902），正在自动添加…', 'muted');
+      try {
+        await addSepolia();       // 添加链
+        await switchToSepolia();  // 添加成功后再切换一次（部分钱包 add 后会自动切换）
+      } catch (addErr) {
+        log('添加网络失败 → ' + explainError(addErr), 'err');
+      }
+    } else {
+      // 其它错误（如用户在弹窗里点了拒绝 → 4001）。
+      log('切换失败 → ' + explainError(err), 'err');
+    }
+  }
+}
+
+$('btnConnect').addEventListener('click', connect);
+$('btnSwitch').addEventListener('click', switchToSepolia);
+$('btnAdd').addEventListener('click', async () => {
+  try {
+    await addSepolia();
+    await refreshChain();
+    log('已添加 Sepolia（如未自动切换，请点“切换到 Sepolia”）✅', 'ok');
+  } catch (err) {
+    log('添加失败 → ' + explainError(err), 'err');
+  }
+});
+
+// 监听链变化：用户在 MetaMask 里手动切链时，实时更新界面。
+if (provider) {
+  provider.on('chainChanged', () => refreshChain());
+}
+</script></body></html>

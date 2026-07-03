@@ -1,0 +1,14 @@
+{
+  "name": "02-ethereum",
+  "version": "1.0.0",
+  "description": "以太坊核心概念教学模块的可运行 demo（ethers v6 连公共 RPC 读链上数据）",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "demo:units": "node 08-ether-units/demo.js",
+    "demo:rpc": "node 09-json-rpc/demo.js"
+  },
+  "dependencies": {
+    "ethers": "^6.13.0"
+  }
+}

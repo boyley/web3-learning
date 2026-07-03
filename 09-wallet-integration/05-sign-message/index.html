@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>05 · 签名登录（personal_sign）</title>
+<style>
+:root{--bg:#0f1420;--card:#1a2232;--fg:#e6edf3;--muted:#8b98a9;--accent:#f6851b;--ok:#3fb950;--err:#f85149;--border:#2d3648}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--fg);line-height:1.6;padding:24px}
+.wrap{max-width:820px;margin:0 auto}h1{font-size:1.5rem}h2{font-size:1.1rem;border-bottom:1px solid var(--border);padding-bottom:6px;margin-top:28px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin:16px 0}
+button{background:var(--accent);color:#111;border:0;border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer;font-size:.95rem;margin:4px 6px 4px 0}
+button:hover{opacity:.9}button:disabled{opacity:.4;cursor:not-allowed}
+pre{background:#0b0f17;border:1px solid var(--border);border-radius:8px;padding:14px;overflow:auto;font-size:.85rem}
+code{color:var(--accent)}input,textarea{background:#0b0f17;border:1px solid var(--border);color:var(--fg);border-radius:6px;padding:8px;font-size:.9rem;width:100%;font-family:inherit}
+.ok{color:var(--ok)}.err{color:var(--err)}.muted{color:var(--muted)}
+.warn{background:#3a2a12;border:1px solid #7a5a24;border-radius:8px;padding:12px;font-size:.9rem}#log{min-height:60px}
+</style></head><body><div class="wrap"><h1>05 · 签名登录（personal_sign）</h1>
+<p class="muted">用 personal_sign 让用户对一段明文消息签名，证明钱包地址的所有权。签名不上链、不花 Gas，后端用 ecrecover 验签即可实现"用钱包登录"（SIWE 思路）。</p>
+
+<div class="card">
+  <h2>① 连接钱包</h2>
+  <button id="btnConnect">连接 MetaMask</button>
+  <p class="muted">当前地址：<span id="account">未连接</span></p>
+</div>
+
+<div class="card">
+  <h2>② 待签名消息（SIWE 风格）</h2>
+  <p class="muted">真实场景里 nonce 由后端下发（防重放）。你可以修改下面文案再签名。</p>
+  <textarea id="message" rows="8"></textarea>
+  <div style="margin-top:12px">
+    <button id="btnSign" disabled>签名登录</button>
+  </div>
+</div>
+
+<div class="card">
+  <h2>签名结果 / 日志</h2>
+  <pre id="log" class="muted">等待操作…</pre>
+</div>
+
+<div class="warn">
+  ⚠️ <b>盲签 / 钓鱼签名警示</b>：personal_sign 会在钱包里显示<strong>明文</strong>，所以相对安全——但仍要逐字核对消息里的<strong>域名、动作和金额</strong>。任何让你签"看不懂的乱码/哈希"的网站都要高度警惕，签名同样可能被用来盗取授权或资产。
+</div>
+</div>
+
+<script>
+/* ========================================================================
+ * 模块 05：personal_sign 签名登录
+ * 用途：证明"我拥有这个地址的私钥"，无需上链、无需 Gas。
+ *   典型流程（SIWE, Sign-In With Ethereum）：
+ *     后端下发带 nonce 的消息 → dApp 请求 personal_sign → 用户在钱包确认
+ *     → 返回签名 → 后端用 ecrecover 从签名恢复地址，与声称地址比对 → 放行。
+ *
+ * personal_sign 的 params 顺序是 [messageHex, address]。
+ * message 需要先转成 hex 字符串（下面的 toHex 函数）。
+ * ======================================================================== */
+
+const $ = (id) => document.getElementById(id);
+const log = (msg, cls = 'muted') => { $('log').className = cls; $('log').textContent = msg; };
+
+const provider = window.ethereum;
+if (!provider) {
+  log('未检测到 window.ethereum，请先安装 MetaMask：https://metamask.io/', 'err');
+  document.querySelectorAll('button').forEach((b) => (b.disabled = true));
+}
+
+// 把 UTF-8 字符串转成 0x 开头的十六进制字符串。
+// personal_sign 要求 message 以 hex 传入（也能传原始字符串，但 hex 更稳妥、能表达任意字节）。
+function toHex(str) {
+  return '0x' + [...new TextEncoder().encode(str)]
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+function explainError(err) {
+  const map = {
+    4001: '用户在钱包里拒绝了签名（4001）',
+    4100: '当前账户未授权此操作（4100）',
+    4200: '钱包不支持该方法（4200）',
+  };
+  const code = err && err.code;
+  return `${map[code] || '错误'}：${err && err.message ? err.message : String(err)}（code=${code}）`;
+}
+
+let currentAccount = null;
+
+// 生成一段 SIWE 风格的默认登录消息。真实项目里 nonce 必须由后端生成并存储，用于防重放。
+function buildSiweMessage(address) {
+  const nonce = Math.random().toString(36).slice(2, 12); // 演示用；生产由后端下发
+  const now = new Date().toISOString();
+  return (
+    `${location.host} 希望你使用以太坊账户登录：\n` +
+    `${address}\n\n` +
+    `点击签名即代表你同意本站的登录条款。此操作不会花费 Gas，也不会发起链上交易。\n\n` +
+    `URI: ${location.origin}\n` +
+    `Version: 1\n` +
+    `Chain ID: 11155111\n` +
+    `Nonce: ${nonce}\n` +
+    `Issued At: ${now}`
+  );
+}
+
+async function connect() {
+  try {
+    const accounts = await provider.request({ method: 'eth_requestAccounts' });
+    currentAccount = accounts[0];
+    $('account').textContent = currentAccount;
+    $('message').value = buildSiweMessage(currentAccount); // 填入默认消息
+    $('btnSign').disabled = false;
+    log('已连接钱包：' + currentAccount, 'ok');
+  } catch (err) {
+    log('连接失败 → ' + explainError(err), 'err');
+  }
+}
+
+async function signIn() {
+  try {
+    const message = $('message').value;
+    const messageHex = toHex(message);
+    log('等待用户在钱包中确认签名…', 'muted');
+
+    // 关键调用：personal_sign，params 顺序是 [messageHex, address]。
+    const signature = await provider.request({
+      method: 'personal_sign',
+      params: [messageHex, currentAccount],
+    });
+
+    // 拿到签名后，真实场景应把 { message, signature, address } 发给后端。
+    // 后端用 ecrecover(message, signature) 恢复出地址，与 address 一致即验证通过。
+    log(
+      '签名成功 ✅（签名不上链、不花 Gas）\n\n' +
+      'address:\n' + currentAccount + '\n\n' +
+      'signature:\n' + signature + '\n\n' +
+      '→ 下一步：把 message + signature 交给后端，后端用 ecrecover 验签后放行。',
+      'ok'
+    );
+  } catch (err) {
+    log('签名失败 → ' + explainError(err), 'err');
+  }
+}
+
+$('btnConnect').addEventListener('click', connect);
+$('btnSign').addEventListener('click', signIn);
+</script></body></html>

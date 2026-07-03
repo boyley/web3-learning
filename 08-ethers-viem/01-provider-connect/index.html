@@ -1,0 +1,52 @@
+<!--
+  01 · BrowserProvider 连接钱包（需要 MetaMask）
+  运行：用浏览器直接打开本文件（建议用 VSCode Live Server 或 `npx serve`）。
+  作用：点击按钮，通过 EIP-1193 的 window.ethereum 连接 MetaMask，读取当前账户与 chainId。
+-->
+<meta charset="utf-8" />
+<title>01 · BrowserProvider 连接 MetaMask</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; }
+  button { padding: 10px 18px; font-size: 15px; cursor: pointer; }
+  pre { background: #f5f5f5; padding: 14px; border-radius: 8px; white-space: pre-wrap; }
+  .tip { color: #b26a00; }
+</style>
+
+<h1>01 · 用 BrowserProvider 连接钱包</h1>
+<p class="tip">⚠️ 需要安装 MetaMask 浏览器插件。建议先在 MetaMask 里切换到 <b>Sepolia 测试网</b>。</p>
+<button id="btn">连接 MetaMask</button>
+<pre id="out">点击上面的按钮开始…</pre>
+
+<script type="module">
+  // ethers v6 的 ESM CDN（+esm 直接给出 ES Module 版本）
+  import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.13.4/+esm";
+
+  const out = document.getElementById("out");
+  const log = (obj) => (out.textContent = JSON.stringify(obj, null, 2));
+
+  document.getElementById("btn").onclick = async () => {
+    // 1) 检测钱包：EIP-1193 标准把注入对象挂在 window.ethereum
+    if (!window.ethereum) {
+      out.textContent = "未检测到钱包，请先安装 MetaMask。";
+      return;
+    }
+
+    // 2) BrowserProvider 包裹 window.ethereum，成为 ethers 的 Provider
+    const provider = new ethers.BrowserProvider(window.ethereum);
+
+    // 3) 请求授权连接账户（会弹出 MetaMask 授权窗口）
+    //    getSigner() 内部会触发 eth_requestAccounts
+    const signer = await provider.getSigner();
+    const address = await signer.getAddress();
+
+    // 4) 读取当前网络
+    const network = await provider.getNetwork();
+
+    log({
+      账户地址: address,
+      chainId: network.chainId.toString(),
+      网络: network.name,
+      说明: "BrowserProvider = 读链通道 + 通过钱包签名的能力",
+    });
+  };
+</script>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>08 · 钱包 · 助记词→私钥→公钥→地址 Demo</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js"></script>
+  <style>
+    body { font-family: -apple-system, "PingFang SC", sans-serif; max-width: 880px; margin: 24px auto; padding: 0 16px; line-height: 1.6; color: #222; }
+    h1 { font-size: 20px; }
+    .box { border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin: 12px 0; }
+    .mono { font-family: monospace; word-break: break-all; background: #f6f6f6; padding: 8px; border-radius: 6px; font-size: 12px; }
+    button { padding: 8px 14px; margin: 6px 6px 6px 0; border: 1px solid #888; border-radius: 6px; background: #fff; cursor: pointer; }
+    button:hover { background: #f0f0f0; }
+    .meta { color: #555; font-size: 13px; }
+    .step { color: #08a; font-weight: bold; }
+    table { border-collapse: collapse; width: 100%; font-size: 12px; }
+    td, th { border: 1px solid #ddd; padding: 6px; font-family: monospace; }
+  </style>
+</head>
+<body>
+  <h1>钱包的本质：助记词 → 私钥 → 公钥 → 地址（单向派生）</h1>
+  <p class="meta">
+    本页用 ethers 在浏览器本地随机生成一套<strong>测试助记词与钱包</strong>（仅存内存、刷新即失），
+    演示 BIP39 助记词如何一步步派生出私钥、公钥、地址。<strong>不联网上链、不涉及真实资产。切勿保存/使用这里显示的助记词存真钱。</strong>
+  </p>
+
+  <div class="box">
+    <button onclick="gen()">🎲 生成一套随机测试钱包</button>
+    <div class="meta"><span class="step">① 助记词 (BIP39 mnemonic)</span> — 12 个单词，是一切的种子，等价于「主私钥」，最该保密：</div>
+    <div class="mono" id="mnemonic">—</div>
+    <div class="meta"><span class="step">② 私钥 (private key)</span> — 由助记词按 BIP32/44 派生，32 字节：</div>
+    <div class="mono" id="pk">—</div>
+    <div class="meta"><span class="step">③ 公钥 (public key)</span> — 由私钥经椭圆曲线 secp256k1 单向算出：</div>
+    <div class="mono" id="pub">—</div>
+    <div class="meta"><span class="step">④ 地址 (address)</span> — 公钥经 Keccak-256 哈希取后 20 字节，就是你的「收款账号」：</div>
+    <div class="mono" id="addr">—</div>
+  </div>
+
+  <div class="box">
+    <div class="meta"><span class="step">一份助记词 = 一棵钱包树</span>：同一助记词按 BIP44 路径 m/44'/60'/0'/0/x 可派生出无数个账户地址（x=0,1,2...）。这就是 MetaMask 里「账户1、账户2」的由来：</div>
+    <table id="derived"><thead><tr><th>路径 (BIP44)</th><th>地址</th></tr></thead><tbody></tbody></table>
+  </div>
+
+  <script>
+    function gen() {
+      // 随机生成带助记词的 HD 钱包（本地、内存、演示用）
+      const w = ethers.Wallet.createRandom();
+      document.getElementById("mnemonic").textContent = w.mnemonic.phrase;
+      document.getElementById("pk").textContent = w.privateKey;
+      document.getElementById("pub").textContent = w.signingKey.publicKey; // 未压缩公钥 0x04...
+      document.getElementById("addr").textContent = w.address;
+
+      // 从同一助记词按 BIP44 标准路径派生多个账户，展示「一词生多址」
+      const tbody = document.querySelector("#derived tbody");
+      tbody.innerHTML = "";
+      const node = ethers.HDNodeWallet.fromPhrase(w.mnemonic.phrase); // m
+      for (let i = 0; i < 3; i++) {
+        const path = `m/44'/60'/0'/0/${i}`;
+        const child = ethers.HDNodeWallet.fromPhrase(w.mnemonic.phrase, "", path);
+        tbody.innerHTML += `<tr><td>${path}</td><td>${child.address}</td></tr>`;
+      }
+    }
+    gen();
+  </script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>01 · IPFS 是什么 · 内容寻址直觉演示</title>
+  <style>
+    body { font-family: -apple-system, "PingFang SC", sans-serif; max-width: 760px; margin: 32px auto; padding: 0 16px; line-height: 1.6; color: #222; }
+    h1 { font-size: 22px; }
+    .card { border: 1px solid #e2e2e2; border-radius: 10px; padding: 16px 18px; margin: 16px 0; background: #fafafa; }
+    label { font-weight: 600; display: block; margin-bottom: 6px; }
+    textarea, input { width: 100%; box-sizing: border-box; font-family: ui-monospace, Menlo, monospace; font-size: 13px; padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
+    .hash { word-break: break-all; background: #0d1117; color: #7ee787; padding: 10px; border-radius: 6px; font-family: ui-monospace, monospace; font-size: 13px; margin-top: 8px; }
+    button { background: #3172d4; color: #fff; border: 0; border-radius: 6px; padding: 9px 16px; font-size: 14px; cursor: pointer; margin-top: 10px; }
+    button:hover { background: #245bb0; }
+    .out { white-space: pre-wrap; word-break: break-all; background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 10px; margin-top: 8px; font-family: ui-monospace, monospace; font-size: 12px; max-height: 220px; overflow: auto; }
+    small { color: #666; }
+  </style>
+</head>
+<body>
+  <h1>🪐 IPFS 是什么 · 内容寻址直觉演示</h1>
+  <p>内容寻址的核心直觉：<b>内容决定地址</b>。改一个字符，指纹（哈希）就完全不同。真实的 CID 比裸哈希多了版本/编码等元数据（见 02 模块），但直觉一致。</p>
+
+  <div class="card">
+    <label for="txt">① 输入任意文本，实时看它的 SHA-256 指纹</label>
+    <textarea id="txt" rows="3">Hello, IPFS! 改动我看看哈希怎么变。</textarea>
+    <div class="hash" id="hash">计算中…</div>
+    <small>这就是「内容 → 唯一指纹」的映射。同样的内容，在任何机器上算出的指纹都一样，这正是全网能对同一份内容用同一个地址的原因。</small>
+  </div>
+
+  <div class="card">
+    <label for="cid">② 只凭 CID、不指定服务器，从公共网关读取真实内容</label>
+    <input id="cid" value="QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco/wiki/Vincent_van_Gogh.html" />
+    <small>上面是 IPFS 官方文档常用的经典示例 CID（一份英文维基快照目录）。你没有指定任何服务器，只给了「内容是什么」。</small>
+    <button id="fetchBtn">从 IPFS 网关读取（ipfs.io）</button>
+    <div class="out" id="out">点击按钮，通过 https://ipfs.io/ipfs/&lt;CID&gt; 取回内容前 800 字…</div>
+  </div>
+
+  <script>
+    // ① 实时 SHA-256：演示“内容 → 指纹”的确定性映射
+    const txt = document.getElementById('txt');
+    const hashBox = document.getElementById('hash');
+    async function sha256(str) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+      return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    async function refresh() { hashBox.textContent = 'sha256: ' + await sha256(txt.value); }
+    txt.addEventListener('input', refresh);
+    refresh();
+
+    // ② 通过公共网关按 CID 取内容：演示“只问内容、不问位置”
+    const out = document.getElementById('out');
+    document.getElementById('fetchBtn').addEventListener('click', async () => {
+      const cid = document.getElementById('cid').value.trim();
+      const url = 'https://ipfs.io/ipfs/' + cid;
+      out.textContent = '正在从 ' + url + ' 读取…（网关偶尔较慢，请稍候）';
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const text = (await res.text()).slice(0, 800);
+        out.textContent = '✅ 成功（内容前 800 字）:\n\n' + text;
+      } catch (e) {
+        out.textContent = '⚠️ 读取失败: ' + e.message +
+          '\n\n可能是网关限速/临时不可用。可换 04 模块里的其它网关（如 https://dweb.link/ipfs/' + cid + '）重试。';
+      }
+    });
+  </script>
+</body>
+</html>

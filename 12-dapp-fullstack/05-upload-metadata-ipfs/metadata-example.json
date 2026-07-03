@@ -1,0 +1,10 @@
+{
+  "name": "My First dApp NFT #0",
+  "description": "Web3 学习合集 · 12 · 一条龙 dApp 实战铸造的第一枚 NFT（教学用途）。",
+  "image": "ipfs://bafybeiEXAMPLEreplaceWithYourImageCID",
+  "attributes": [
+    { "trait_type": "Level", "value": "Beginner" },
+    { "trait_type": "Course", "value": "Web3 Learning" },
+    { "trait_type": "Module", "value": 12 }
+  ]
+}

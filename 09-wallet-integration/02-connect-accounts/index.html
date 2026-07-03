@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>02 · 请求连接账户（Connect Accounts）</title>
+<style>
+  :root{--bg:#0f1420;--card:#1a2232;--fg:#e6edf3;--muted:#8b98a9;--accent:#f6851b;--ok:#3fb950;--err:#f85149;--border:#2d3648}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--fg);line-height:1.6;padding:24px}
+  .wrap{max-width:820px;margin:0 auto}
+  h1{font-size:1.5rem} h2{font-size:1.1rem;border-bottom:1px solid var(--border);padding-bottom:6px;margin-top:28px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin:16px 0}
+  button{background:var(--accent);color:#111;border:0;border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer;font-size:.95rem;margin:4px 6px 4px 0}
+  button:hover{opacity:.9} button:disabled{opacity:.4;cursor:not-allowed}
+  pre{background:#0b0f17;border:1px solid var(--border);border-radius:8px;padding:14px;overflow:auto;font-size:.85rem}
+  code{color:var(--accent)}
+  .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .kv{display:grid;grid-template-columns:140px 1fr;gap:8px;font-size:.9rem}
+  .kv div:nth-child(odd){color:var(--muted)}
+  input{background:#0b0f17;border:1px solid var(--border);color:var(--fg);border-radius:6px;padding:8px;font-size:.9rem;width:100%}
+  .ok{color:var(--ok)} .err{color:var(--err)} .muted{color:var(--muted)}
+  .warn{background:#3a2a12;border:1px solid #7a5a24;border-radius:8px;padding:12px;font-size:.9rem}
+  .badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:.8rem;font-weight:600}
+  .badge.on{background:#12351d;color:var(--ok);border:1px solid #1f6f34}
+  .badge.off{background:#3a1414;color:var(--err);border:1px solid #7a2424}
+  #log{min-height:60px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>02 · 请求连接账户（Connect Accounts）</h1>
+  <p class="muted">用 eth_requestAccounts 向钱包发起连接握手，拿到用户授权的地址。</p>
+
+  <div class="warn">
+    ⚠️ 「连接」会把你的钱包地址与余额暴露给本站点，但<strong>不等于授权花费你的资产</strong>。只有后续的「签名 / 授权（approve）」才可能动用资产。本练习只在 Sepolia 测试网操作。
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <button id="btnConnect">连接钱包</button>
+      <button id="btnDisconnect" disabled>清空本页状态</button>
+      <span>连接状态：<span id="badge" class="badge off">未连接</span></span>
+    </div>
+    <div class="kv" id="kv" style="margin-top:14px">
+      <div>当前账户</div><div id="account" class="muted">—</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0;border:0">日志</h2>
+    <pre id="log"></pre>
+  </div>
+</div>
+
+<script>
+// ======================================================================
+// 模块 02：请求连接账户
+// ----------------------------------------------------------------------
+// 关键 API：provider.request({ method: 'eth_requestAccounts' })
+//   - 这是「请求授权连接」的方法，会弹出 MetaMask 窗口让用户批准。
+//   - 用户批准后返回已授权的账户地址数组（通常第 0 个是当前账户）。
+//   - 用户拒绝会抛出错误，错误码 4001（用户拒绝请求）。
+// ======================================================================
+
+const logEl = document.getElementById('log');
+const badgeEl = document.getElementById('badge');
+const accountEl = document.getElementById('account');
+const btnConnect = document.getElementById('btnConnect');
+const btnDisconnect = document.getElementById('btnDisconnect');
+
+// 日志小工具：往输出区追加一行（带时间戳）
+function log(msg, cls) {
+  const time = new Date().toLocaleTimeString();
+  const line = document.createElement('div');
+  if (cls) line.className = cls;
+  line.textContent = `[${time}] ${msg}`;
+  logEl.appendChild(line);
+}
+
+// EIP-1193 常见错误码 → 中文解读，方便在日志里给出友好提示
+function explainError(code) {
+  const map = {
+    4001: '用户拒绝了请求（User rejected the request）',
+    4100: '未授权：该账户/方法未被授权（Unauthorized）',
+    4200: '钱包不支持该方法（Unsupported method）',
+    4900: '钱包已与所有链断开（Disconnected）',
+    4901: '钱包未连接到目标链（Chain disconnected）',
+    4902: '目标链未添加到钱包（需先 wallet_addEthereumChain）',
+  };
+  return map[code] || '未知错误码';
+}
+
+// 统一维护「已连接 / 未连接」的界面状态
+function setConnected(account) {
+  if (account) {
+    badgeEl.textContent = '已连接';
+    badgeEl.className = 'badge on';
+    accountEl.textContent = account;
+    accountEl.className = 'ok';
+    btnDisconnect.disabled = false;
+  } else {
+    badgeEl.textContent = '未连接';
+    badgeEl.className = 'badge off';
+    accountEl.textContent = '—';
+    accountEl.className = 'muted';
+    btnDisconnect.disabled = true;
+  }
+}
+
+// 点击「连接钱包」→ 发起 EIP-1193 连接握手
+async function connect() {
+  // 先确保钱包存在
+  if (typeof window.ethereum === 'undefined') {
+    log('未检测到钱包，请安装 MetaMask。', 'err');
+    return;
+  }
+
+  btnConnect.disabled = true;
+  log('调用 eth_requestAccounts，请在 MetaMask 弹窗中批准…');
+
+  try {
+    // 核心调用：请求授权连接。这一步会触发 MetaMask 弹窗。
+    // 返回值是一个地址数组，例如 ['0xabc...']。
+    const accounts = await window.ethereum.request({
+      method: 'eth_requestAccounts',
+    });
+
+    if (!accounts || accounts.length === 0) {
+      // 极少数情况下批准了却没返回地址
+      log('钱包返回了空账户列表，可能未选择任何账户。', 'err');
+      setConnected(null);
+      return;
+    }
+
+    // 约定俗成：数组第 0 个是当前选中的账户
+    const current = accounts[0];
+    setConnected(current);
+    log(`连接成功 ✅ 已授权账户共 ${accounts.length} 个，当前账户：${current}`, 'ok');
+    log('注意：连接只是暴露了地址，站点无法用它花你的钱。', 'muted');
+  } catch (err) {
+    // EIP-1193 的错误对象通常带 code 与 message
+    if (err && err.code === 4001) {
+      log(`连接被拒绝（code 4001）：${explainError(4001)}。这是用户主动取消，属正常情况。`, 'err');
+    } else {
+      const code = err && err.code;
+      log(`连接失败${code ? `（code ${code}：${explainError(code)}）` : ''}：${err && err.message}`, 'err');
+    }
+    setConnected(null);
+  } finally {
+    btnConnect.disabled = false;
+  }
+}
+
+// 「清空本页状态」：注意 —— dApp 无法主动让钱包「断开」，
+// 真正的撤销连接要在 MetaMask 里操作（已连接的网站 → 断开）。
+// 这里只是把本页面 UI 复位，帮助理解「连接授权保存在钱包侧」。
+function clearState() {
+  setConnected(null);
+  log('已清空本页 UI 状态。注意：钱包侧的连接授权仍然存在，', 'muted');
+  log('若要真正撤销，请在 MetaMask →「已连接的网站」中手动断开本站。', 'muted');
+}
+
+// 监听 accountsChanged：用户在钱包里切换账户 / 断开连接时触发。
+// accounts 为 string[]，为空数组代表已断开所有账户。
+if (window.ethereum) {
+  window.ethereum.on('accountsChanged', (accounts) => {
+    if (accounts.length === 0) {
+      log('事件 accountsChanged：账户列表为空，钱包已断开本站连接。', 'err');
+      setConnected(null);
+    } else {
+      log(`事件 accountsChanged：当前账户切换为 ${accounts[0]}`, 'ok');
+      setConnected(accounts[0]);
+    }
+  });
+}
+
+btnConnect.addEventListener('click', connect);
+btnDisconnect.addEventListener('click', clearState);
+
+// 页面加载时给个初始提示
+if (typeof window.ethereum === 'undefined') {
+  log('未检测到钱包，请安装 MetaMask 后刷新。', 'err');
+} else {
+  log('已检测到钱包，点击「连接钱包」发起 eth_requestAccounts 握手。', 'muted');
+}
+</script>
+</body>
+</html>

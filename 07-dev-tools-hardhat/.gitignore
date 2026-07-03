@@ -1,0 +1,25 @@
+# === 依赖与构建产物 ===
+node_modules/
+artifacts/
+cache/
+typechain-types/
+
+# === 覆盖率报告 ===
+coverage/
+coverage.json
+
+# === Foundry 产物（10-foundry-intro）===
+out/
+broadcast/
+lib/
+
+# === 敏感信息：绝不提交私钥 / API Key ===
+# 每个用到测试网的模块都用 .env 存私钥，且必须被忽略
+.env
+.env.*
+!.env.example
+
+# === 编辑器 / 系统 ===
+.DS_Store
+.vscode/
+.idea/

@@ -1,0 +1,77 @@
+<!--
+  05 · 发送 ETH 交易（需要 MetaMask + Sepolia 测试币）
+  用浏览器打开（建议 `npx serve`）。
+  演示：通过 Signer 发一笔 ETH 转账 -> 拿到 txHash -> tx.wait() 等待上链确认。
+  ⚠️ 这是【写操作】，会真正上链并消耗 Sepolia 测试 Gas（免费币，无真实价值）。
+-->
+<meta charset="utf-8" />
+<title>05 · 发送 ETH 交易</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; }
+  input { padding: 8px; width: 100%; box-sizing: border-box; margin: 6px 0; }
+  button { padding: 10px 18px; font-size: 15px; cursor: pointer; }
+  pre { background: #f5f5f5; padding: 14px; border-radius: 8px; white-space: pre-wrap; }
+  .tip { color: #b26a00; }
+</style>
+
+<h1>05 · 发送一笔 ETH 交易</h1>
+<p class="tip">
+  ⚠️ 仅限 Sepolia 测试网！先去水龙头领测试币：
+  <a href="https://sepoliafaucet.com" target="_blank">sepoliafaucet.com</a> /
+  <a href="https://www.alchemy.com/faucets/ethereum-sepolia" target="_blank">Alchemy Faucet</a>
+</p>
+
+<label>收款地址（To）</label>
+<input id="to" placeholder="0x... （可填你自己另一个测试地址）" />
+<label>金额（ETH）</label>
+<input id="amount" value="0.001" />
+<button id="send">连接钱包并发送</button>
+<pre id="out">填好收款地址与金额后点击发送…</pre>
+
+<script type="module">
+  import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.13.4/+esm";
+
+  const out = document.getElementById("out");
+  const log = (s) => (out.textContent = s);
+
+  document.getElementById("send").onclick = async () => {
+    try {
+      if (!window.ethereum) return log("未检测到 MetaMask");
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+
+      // 确认在 Sepolia（chainId 11155111），防止误发主网
+      const net = await provider.getNetwork();
+      if (net.chainId !== 11155111n) {
+        return log(`请在 MetaMask 切换到 Sepolia，当前 chainId=${net.chainId}`);
+      }
+
+      const to = document.getElementById("to").value.trim();
+      const amount = document.getElementById("amount").value.trim();
+
+      log("① 构造交易，等待 MetaMask 确认…");
+      // 发交易：value 用 parseEther 把 "0.001" 转成 wei
+      // MetaMask 会弹窗让用户确认 Gas 与金额，确认后广播，返回一个待打包的 tx
+      const tx = await signer.sendTransaction({
+        to,
+        value: ethers.parseEther(amount),
+      });
+      log(`② 已广播，txHash=${tx.hash}\n   等待矿工打包上链…`);
+
+      // tx.wait() 阻塞直到交易被打包进区块，返回回执
+      const receipt = await tx.wait();
+      log(
+        `③ 交易已上链 ✅\n` +
+        `txHash : ${tx.hash}\n` +
+        `区块   : ${receipt.blockNumber}\n` +
+        `状态   : ${receipt.status === 1 ? "成功" : "失败"}\n` +
+        `gasUsed: ${receipt.gasUsed}\n` +
+        `浏览器 : https://sepolia.etherscan.io/tx/${tx.hash}`
+      );
+    } catch (err) {
+      // 用户在 MetaMask 点"拒绝"会走到这里（code ACTION_REJECTED）
+      log("出错/被拒绝：" + (err.shortMessage || err.message));
+    }
+  };
+</script>

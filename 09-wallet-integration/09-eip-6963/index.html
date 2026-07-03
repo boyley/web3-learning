@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>09 · 多钱包发现 EIP-6963</title>
+<style>
+:root{--bg:#0f1420;--card:#1a2232;--fg:#e6edf3;--muted:#8b98a9;--accent:#f6851b;--ok:#3fb950;--err:#f85149;--border:#2d3648}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--fg);line-height:1.6;padding:24px}
+.wrap{max-width:820px;margin:0 auto}h1{font-size:1.5rem}h2{font-size:1.1rem;border-bottom:1px solid var(--border);padding-bottom:6px;margin-top:28px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin:16px 0}
+button{background:var(--accent);color:#111;border:0;border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer;font-size:.95rem;margin:4px 6px 4px 0}
+button:hover{opacity:.9}button:disabled{opacity:.4;cursor:not-allowed}
+pre{background:#0b0f17;border:1px solid var(--border);border-radius:8px;padding:14px;overflow:auto;font-size:.85rem}
+code{color:var(--accent)}input{background:#0b0f17;border:1px solid var(--border);color:var(--fg);border-radius:6px;padding:8px;font-size:.9rem;width:100%}
+.ok{color:var(--ok)}.err{color:var(--err)}.muted{color:var(--muted)}
+.warn{background:#3a2a12;border:1px solid #7a5a24;border-radius:8px;padding:12px;font-size:.9rem}#log{min-height:60px}
+.wallet-btn{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);width:100%;justify-content:flex-start;color:var(--fg);margin:6px 0}
+.wallet-btn img{width:24px;height:24px;border-radius:4px}
+.rdns{color:var(--muted);font-size:.8rem;margin-left:auto}
+</style></head><body><div class="wrap">
+<h1>09 · 多钱包发现 <code>EIP-6963</code></h1>
+<p class="muted">当浏览器装了多个钱包插件，它们会互相抢占 window.ethereum。EIP-6963 用事件让每个钱包各自广播自己，dApp 列出全部让用户选。</p>
+
+<div class="warn">
+⚠️ 多钱包环境下<b>不要硬编码 window.ethereum</b>——它可能被某个插件覆盖成不是你想要的钱包。钓鱼钱包还可能<b>伪造 name / icon</b>，`rdns` 也并非绝对可信，连接前仍需用户自己辨别。
+</div>
+
+<div class="card">
+  <h2>① 发现已安装的钱包</h2>
+  <button id="btnDiscover">发现钱包（dispatch requestProvider）</button>
+  <p class="muted">页面加载即开始监听 announceProvider；点按钮会再广播一次 requestProvider 促使钱包应答。</p>
+  <div id="walletList"></div>
+</div>
+
+<div class="card">
+  <h2>② 连接结果</h2>
+  <p>所选钱包 rdns：<code id="picked">-</code></p>
+  <p>账户：<code id="acc">-</code></p>
+  <pre id="log">等待发现钱包...</pre>
+</div>
+</div>
+
+<script>
+/* =========================================================================
+ * 09 · EIP-6963 —— 多注入 Provider 发现
+ *
+ * 历史问题：
+ *  - 早期所有钱包都往 window.ethereum 注入自己的 provider。
+ *  - 装了多个钱包（MetaMask + Coinbase + OKX...）时，谁后注入谁覆盖，
+ *    window.ethereum 到底是哪个变得不确定，用户想用 A 却连上了 B。
+ *
+ * EIP-6963 的解法（基于事件，去中心化发现）：
+ *  - 每个钱包在页面里广播 'eip6963:announceProvider' 事件，
+ *    事件的 event.detail 里带上自己的信息和 provider 实例。
+ *  - dApp 先 addEventListener 监听 announceProvider 收集所有钱包，
+ *    再 dispatch 一个 'eip6963:requestProvider' 事件催促钱包应答。
+ *  - dApp 把收集到的钱包渲染成列表，用户点选后，
+ *    使用「那个钱包自己的 provider」发请求，而不是 window.ethereum。
+ *
+ * event.detail 结构：
+ *  { info: { uuid, name, icon(dataURI), rdns(反向域名, 如 io.metamask) },
+ *    provider: EIP1193Provider }
+ * ========================================================================= */
+
+const $ = (id) => document.getElementById(id);
+
+function log(msg, type) {
+  const cls = type ? ` class="${type}"` : '';
+  const t = new Date().toLocaleTimeString();
+  $('log').innerHTML = `<span${cls}>[${t}] ${msg}</span>\n` + $('log').innerHTML;
+}
+
+// 用 Map 按 rdns 去重收集钱包（同一钱包可能广播多次）
+const wallets = new Map();
+
+// 1) 先监听 announceProvider —— 钱包广播时把它收进来
+window.addEventListener('eip6963:announceProvider', (event) => {
+  const { info, provider } = event.detail;   // detail = { info, provider }
+  wallets.set(info.rdns, { info, provider });
+  log(`发现钱包：${info.name}（rdns=${info.rdns}）`, 'ok');
+  renderWallets();
+});
+
+// 2) 广播 requestProvider —— 催促所有钱包应答（announceProvider）
+function requestProviders() {
+  window.dispatchEvent(new Event('eip6963:requestProvider'));
+  log('已 dispatch eip6963:requestProvider，等待钱包应答...', 'muted');
+}
+
+// 把收集到的钱包渲染成按钮列表
+function renderWallets() {
+  const box = $('walletList');
+  box.innerHTML = '';
+  if (wallets.size === 0) {
+    box.innerHTML = '<p class="muted">尚未发现任何支持 EIP-6963 的钱包。</p>';
+    return;
+  }
+  for (const { info, provider } of wallets.values()) {
+    const btn = document.createElement('button');
+    btn.className = 'wallet-btn';
+    // info.icon 是 dataURI，可直接作为 img src
+    btn.innerHTML =
+      `<img src="${info.icon}" alt="" />` +
+      `<span>${info.name}</span>` +
+      `<span class="rdns">${info.rdns}</span>`;
+    btn.onclick = () => connectWith(info, provider);
+    box.appendChild(btn);
+  }
+}
+
+// 3) 用「用户选中的那个钱包的 provider」连接，而非 window.ethereum
+async function connectWith(info, provider) {
+  log(`尝试用 ${info.name} 连接...`);
+  try {
+    const accounts = await provider.request({ method: 'eth_requestAccounts' });
+    $('picked').textContent = info.rdns;
+    $('acc').textContent = accounts[0];
+    log(`已用 ${info.name} 连接：${accounts[0]}`, 'ok');
+    // 之后所有请求都应继续用这个 provider，而不是 window.ethereum
+  } catch (e) {
+    if (e.code === 4001) log('你拒绝了连接（error.code=4001）。', 'err');
+    else log('连接失败：' + (e.message || e), 'err');
+  }
+}
+
+$('btnDiscover').onclick = requestProviders;
+
+// 页面加载时主动请求一次（此时监听器已就绪，能收到应答）
+requestProviders();
+if (wallets.size === 0) {
+  log('若下方为空，说明没有支持 EIP-6963 的钱包，或需装新版 MetaMask 等。', 'muted');
+}
+</script>
+</body></html>

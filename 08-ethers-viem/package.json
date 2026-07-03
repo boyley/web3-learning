@@ -1,0 +1,22 @@
+{
+  "name": "web3-learning-08-ethers-viem",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Web3 学习合集 · 08 前端连接区块链（ethers.js v6 / viem）教学 demo",
+  "scripts": {
+    "01": "node 01-provider-connect/demo.js",
+    "02": "node 02-read-blockchain/demo.js",
+    "03": "node 03-contract-read/demo.js",
+    "07": "node 07-events-logs/demo.js",
+    "08": "node 08-units-utils/demo.js",
+    "09": "node 09-abi-interface/demo.js",
+    "10": "node 10-ens/demo.js",
+    "11": "node 11-error-handling/demo.js",
+    "12": "node 12-viem-modern/demo.js"
+  },
+  "dependencies": {
+    "ethers": "^6.13.4",
+    "viem": "^2.21.0"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "web3-learning-07-dev-tools-hardhat",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Web3 学习合集 · 07 开发工具（Hardhat / Foundry）教学工程。所有模块共用本目录的依赖：在本目录执行一次 npm install，再进入任意 NN-xxx 模块运行 npx hardhat ...（Node 会自上而下查找 ../node_modules）。",
+  "scripts": {
+    "postinstall": "echo '依赖安装完成。进入任意模块目录，例如 cd 01-hardhat-setup && npx hardhat compile'"
+  },
+  "devDependencies": {
+    "hardhat": "^2.28.6",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "dotenv": "^16.4.7"
+  },
+  "//": "hardhat-toolbox 已经内置以下常用插件，无需再单独安装：@nomicfoundation/hardhat-ethers(ethers v6)、@nomicfoundation/hardhat-chai-matchers、@nomicfoundation/hardhat-network-helpers、@nomicfoundation/hardhat-verify、hardhat-gas-reporter、solidity-coverage、chai、ethers、typechain 等。"
+}

@@ -1,0 +1,13 @@
+{
+  "name": "dapp-fullstack-ipfs",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "description": "Web3 学习合集 · 12 · 把 NFT 图片与元数据上传到 IPFS（Pinata）",
+  "scripts": {
+    "upload": "node uploadToPinata.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.0"
+  }
+}

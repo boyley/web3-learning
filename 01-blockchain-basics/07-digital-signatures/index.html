@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>07 · 数字签名与验签 · ethers Demo</title>
+  <!-- ethers v6 UMD（CDN）：只用于本地生成随机测试钱包 + 签名/验签，不联主网、不需真实钱包 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js"></script>
+  <style>
+    body { font-family: -apple-system, "PingFang SC", sans-serif; max-width: 860px; margin: 24px auto; padding: 0 16px; line-height: 1.6; color: #222; }
+    h1 { font-size: 20px; }
+    textarea, input { width: 100%; box-sizing: border-box; font-family: monospace; padding: 8px; }
+    textarea { height: 60px; }
+    .box { border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin: 12px 0; }
+    .mono { font-family: monospace; word-break: break-all; background: #f6f6f6; padding: 8px; border-radius: 6px; font-size: 12px; }
+    button { padding: 8px 14px; margin: 6px 6px 6px 0; border: 1px solid #888; border-radius: 6px; background: #fff; cursor: pointer; }
+    button:hover { background: #f0f0f0; }
+    .ok { color: #2a8; font-weight: bold; }
+    .bad { color: #d33; font-weight: bold; }
+    .meta { color: #555; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h1>数字签名：用私钥签名，任何人用「地址」即可验签</h1>
+  <p class="meta">
+    本页用 ethers 在你浏览器本地随机生成一个<strong>测试钱包</strong>（私钥仅存在内存、刷新即失），
+    演示以太坊消息签名（EIP-191 personal_sign）与验签。<strong>不联网、不连主网、不涉及真实资产。</strong>
+  </p>
+
+  <div class="box">
+    <button onclick="newWallet()">① 生成随机测试钱包</button>
+    <div class="meta">地址(公开，相当于收款账号)：<div class="mono" id="addr">—</div></div>
+    <div class="meta">私钥(保密！这里仅为演示，真实场景绝不外泄)：<div class="mono" id="pk">—</div></div>
+  </div>
+
+  <div class="box">
+    <label class="meta">② 要签名的消息：</label>
+    <textarea id="msg">我(此地址持有者)授权向 Bob 转账 10 测试币</textarea>
+    <button onclick="sign()">用私钥签名</button>
+    <div class="meta">签名(signature)：<div class="mono" id="sig">—</div></div>
+  </div>
+
+  <div class="box">
+    <label class="meta">③ 验签（任何人都能做，只需消息+签名，反推出签名者地址）：</label>
+    <button onclick="verify()">验证签名</button>
+    <div id="verifyResult" class="mono">—</div>
+    <p class="meta">试试：签名后，把上面「要签名的消息」改一个字再点验证 —— 反推出的地址就对不上了。</p>
+  </div>
+
+  <script>
+    let wallet = null;
+
+    function newWallet() {
+      // 本地随机生成，等价于「造一对私钥/公钥」。绝不要把真实私钥放进网页！
+      wallet = ethers.Wallet.createRandom();
+      document.getElementById("addr").textContent = wallet.address;
+      document.getElementById("pk").textContent = wallet.privateKey;
+      document.getElementById("sig").textContent = "—";
+      document.getElementById("verifyResult").textContent = "—";
+    }
+
+    async function sign() {
+      if (!wallet) return alert("请先点①生成钱包");
+      const msg = document.getElementById("msg").value;
+      // signMessage 遵循 EIP-191：对消息加前缀后用私钥做 ECDSA 签名
+      const signature = await wallet.signMessage(msg);
+      document.getElementById("sig").textContent = signature;
+    }
+
+    function verify() {
+      const sig = document.getElementById("sig").textContent;
+      if (!sig || sig === "—") return alert("请先②签名");
+      const msg = document.getElementById("msg").value;
+      const el = document.getElementById("verifyResult");
+      try {
+        // 核心：从「消息 + 签名」反推出签名者地址（ecrecover）。无需私钥、无需公钥！
+        const recovered = ethers.verifyMessage(msg, sig);
+        const match = recovered.toLowerCase() === wallet.address.toLowerCase();
+        el.innerHTML = `反推出的签名者地址：<br/>${recovered}<br/><br/>` +
+          (match
+            ? '<span class="ok">✅ 与钱包地址一致 → 签名有效，消息确由该私钥持有者签署，且未被篡改。</span>'
+            : '<span class="bad">❌ 与原钱包地址不一致 → 消息被改动或签名不匹配。</span>');
+      } catch (e) {
+        el.innerHTML = '<span class="bad">验签出错：' + e.message + '</span>';
+      }
+    }
+
+    newWallet();
+  </script>
+</body>
+</html>

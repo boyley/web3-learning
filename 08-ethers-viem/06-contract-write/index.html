@@ -1,0 +1,69 @@
+<!--
+  06 · 调用合约写方法（需要 MetaMask + Sepolia 测试币）
+  演示：调用 Sepolia WETH 合约的 deposit()（把 ETH 换成 WETH），这是一个会改变状态的写方法。
+  ⚠️ 写操作会上链、花 Gas。仅限 Sepolia 测试网。
+-->
+<meta charset="utf-8" />
+<title>06 · 调用合约写方法</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; }
+  input { padding: 8px; width: 100%; box-sizing: border-box; margin: 6px 0; }
+  button { padding: 10px 18px; font-size: 15px; cursor: pointer; }
+  pre { background: #f5f5f5; padding: 14px; border-radius: 8px; white-space: pre-wrap; }
+  .tip { color: #b26a00; }
+</style>
+
+<h1>06 · 调用合约写方法（WETH.deposit）</h1>
+<p class="tip">⚠️ 仅限 Sepolia。deposit 会把你转入的 ETH 铸成等量 WETH（可再 withdraw 换回）。</p>
+
+<label>存入金额（ETH → WETH）</label>
+<input id="amount" value="0.001" />
+<button id="deposit">连接钱包并 deposit</button>
+<pre id="out">点击按钮开始…</pre>
+
+<script type="module">
+  import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.13.4/+esm";
+
+  const WETH = "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14";
+  // 写方法 deposit 需要付 ETH，所以标 payable；balanceOf 用来读结果
+  const ABI = [
+    "function deposit() payable",
+    "function balanceOf(address) view returns (uint256)",
+  ];
+
+  const out = document.getElementById("out");
+  const log = (s) => (out.textContent = s);
+
+  document.getElementById("deposit").onclick = async () => {
+    try {
+      if (!window.ethereum) return log("未检测到 MetaMask");
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+
+      const net = await provider.getNetwork();
+      if (net.chainId !== 11155111n)
+        return log(`请切到 Sepolia，当前 chainId=${net.chainId}`);
+
+      // ★ 关键：合约用 signer 构造，才能调用写方法
+      const weth = new ethers.Contract(WETH, ABI, signer);
+      const amount = ethers.parseEther(document.getElementById("amount").value);
+
+      log("① 发起 deposit()，等待 MetaMask 确认…");
+      // 写方法调用：payable 方法把金额放在 overrides 的 value 里
+      const tx = await weth.deposit({ value: amount });
+      log(`② 已广播 txHash=${tx.hash}\n   等待上链确认…`);
+
+      const receipt = await tx.wait(); // 等待打包
+      const myAddr = await signer.getAddress();
+      const bal = await weth.balanceOf(myAddr); // 读取最新 WETH 余额
+
+      log(
+        `③ 上链成功 ✅ 状态=${receipt.status}\n` +
+        `你现在的 WETH 余额: ${ethers.formatEther(bal)} WETH\n` +
+        `浏览器: https://sepolia.etherscan.io/tx/${tx.hash}`
+      );
+    } catch (err) {
+      log("出错/被拒绝：" + (err.shortMessage || err.message));
+    }
+  };
+</script>

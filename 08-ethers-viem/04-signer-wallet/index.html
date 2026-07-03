@@ -1,0 +1,60 @@
+<!--
+  04 · Signer / 连接钱包账户（需要 MetaMask）
+  用浏览器打开（建议 `npx serve`）。
+  演示：拿到 Signer -> 读地址/余额 -> 用私钥背后的账户对一条消息做签名（signMessage，不花 Gas）。
+-->
+<meta charset="utf-8" />
+<title>04 · Signer 与钱包账户</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; }
+  button { padding: 10px 18px; font-size: 15px; cursor: pointer; margin-right: 8px; }
+  pre { background: #f5f5f5; padding: 14px; border-radius: 8px; white-space: pre-wrap; }
+  .tip { color: #b26a00; }
+</style>
+
+<h1>04 · Signer：代表你钱包账户的对象</h1>
+<p class="tip">⚠️ 需要 MetaMask，建议切到 Sepolia。签名不花 Gas，但请只在你信任的站点签名（防钓鱼）。</p>
+<button id="connect">1. 连接钱包</button>
+<button id="sign" disabled>2. 签名一条消息</button>
+<pre id="out">点击"连接钱包"开始…</pre>
+
+<script type="module">
+  import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.13.4/+esm";
+
+  const out = document.getElementById("out");
+  const btnSign = document.getElementById("sign");
+  let signer = null;
+
+  document.getElementById("connect").onclick = async () => {
+    if (!window.ethereum) return (out.textContent = "未检测到 MetaMask");
+
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    // getSigner() 拿到"能签名的账户对象"。Signer = Provider 的读能力 + 账户签名能力
+    signer = await provider.getSigner();
+
+    const address = await signer.getAddress();
+    // Signer 也能读余额（内部借它自己的 Provider）
+    const balance = await provider.getBalance(address);
+
+    out.textContent = JSON.stringify({
+      账户地址: address,
+      余额ETH: ethers.formatEther(balance),
+    }, null, 2);
+    btnSign.disabled = false;
+  };
+
+  btnSign.onclick = async () => {
+    const message = `我在 ${new Date().toLocaleString()} 登录 dApp`;
+    // signMessage：用账户私钥对文本签名（EIP-191），MetaMask 弹窗确认，链下完成、不花 Gas
+    const signature = await signer.signMessage(message);
+    // 用签名反推签名者地址，验证签名有效性（无需私钥）
+    const recovered = ethers.verifyMessage(message, signature);
+
+    out.textContent = JSON.stringify({
+      原文: message,
+      签名: signature,
+      从签名恢复出的地址: recovered,
+      与当前账户一致: recovered.toLowerCase() === (await signer.getAddress()).toLowerCase(),
+    }, null, 2);
+  };
+</script>
