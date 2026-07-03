@@ -48,6 +48,7 @@ npx hardhat test
 
 ## ⚠️ 常见坑 / 安全提示
 
+- **中文/非 ASCII 要用 `unicode"..."`**：Solidity 普通字符串字面量只允许 ASCII，`console.log("调用者")` 会报 `Invalid character in string`；必须写 `console.log(unicode"调用者")`（本模块合约已这样处理）。
 - **只在 Hardhat Network 有效**：部署到 Sepolia/主网后 `console.log` 不会有任何输出。
 - **上主网前请删除** `import "hardhat/console.sol"` 及所有 `console.log`——它们会平白增加字节码体积和部署成本。
 - 参数类型要匹配重载；打印结构体/数组需逐字段打印。

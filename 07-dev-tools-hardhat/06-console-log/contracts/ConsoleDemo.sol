@@ -18,17 +18,19 @@ contract ConsoleDemo {
     }
 
     function transfer(address to, uint256 amount) external {
-        // console.log 支持多种类型与占位符 %s / %d，超方便定位问题
-        console.log("transfer 调用者:", msg.sender);
-        console.log("转给:", to, " 数量:", amount);
-        console.log("转账前 - 我的余额:", balances[msg.sender]);
+        // console.log 支持多种类型与占位符 %s / %d，超方便定位问题。
+        // ★ 注意：Solidity 字符串字面量里若含【非 ASCII 字符（如中文）】，
+        //   必须写成 unicode"..." 形式，否则编译器报 “Invalid character in string”。
+        console.log(unicode"transfer 调用者:", msg.sender);
+        console.log(unicode"转给:", to, unicode" 数量:", amount);
+        console.log(unicode"转账前 - 我的余额:", balances[msg.sender]);
 
         require(balances[msg.sender] >= amount, "Not enough balance");
 
         balances[msg.sender] -= amount;
         balances[to] += amount;
 
-        // 也可以用格式化占位符
-        console.log("转账后 - 我的余额: %s, 对方余额: %s", balances[msg.sender], balances[to]);
+        // 也可以用格式化占位符 %s
+        console.log(unicode"转账后 - 我的余额: %s, 对方余额: %s", balances[msg.sender], balances[to]);
     }
 }

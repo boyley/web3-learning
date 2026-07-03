@@ -12,8 +12,9 @@
 
 import { JsonRpcProvider, Contract, formatEther } from "ethers";
 
-const RPC_URL =
-  process.env.SEPOLIA_RPC_URL || "https://ethereum-sepolia-rpc.publicnode.com";
+// 注意：查事件用的 eth_getLogs 有些免费公共节点会限制（要 archive token）。
+// 这里默认用支持 getLogs 的公共节点 drpc.org；不行就换成自己的 Infura/Alchemy。
+const RPC_URL = process.env.SEPOLIA_RPC_URL || "https://sepolia.drpc.org";
 const WETH = "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14";
 
 // 事件也写在 ABI 里；indexed 参数可用于按值过滤

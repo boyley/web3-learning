@@ -54,6 +54,7 @@ node 07-events-logs/demo.js
 ## ⚠️ 常见坑 / 安全提示
 
 - **区块范围别太大**：公共 RPC 常限制 `queryFilter` 跨度（如 ≤ 每次几千/一万区块），一次查全历史会报错，要**分页**。
+- **有的免费节点禁用 `eth_getLogs`**：如 publicnode 会提示"archive request 需要 token"。本 demo 默认改用支持 getLogs 的 `https://sepolia.drpc.org`；生产建议用自己的 Infura/Alchemy Key。
 - **HTTP 下的 `.on` 是轮询**：延迟高、耗请求。要低延迟实时性请用 `WebSocketProvider`。
 - **忘记移除监听**会内存泄漏；组件卸载/脚本结束前 `removeAllListeners()`。
 - **重组（reorg）**：极新的事件可能因链重组被回滚，关键场景要等几个确认再采信。

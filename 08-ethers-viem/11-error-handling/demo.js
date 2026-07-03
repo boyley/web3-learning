@@ -45,10 +45,11 @@ async function main() {
     console.log("  reason       :", err.reason);        // 合约给出的原因（若有）
   }
 
-  // ---- 案例 B：地址写错 / 参数类型不对（本地就抛，属 INVALID_ARGUMENT）----
-  console.log("\n=== 案例 B：非法地址参数 ===");
+  // ---- 案例 B：地址写错（校验和不对，本地就抛，属 INVALID_ARGUMENT）----
+  // 下面这个地址把某一位大小写写错了，checksum 校验不过，ethers 编码阶段就报错（还没发出去）
+  console.log("\n=== 案例 B：非法地址参数（校验和错误）===");
   try {
-    await weth.transfer.staticCall("不是地址", 1n);
+    await weth.transfer.staticCall("0x8626F6940E2Eb28930eFb4CeF49B2d1F2C9C1199", 1n);
   } catch (err) {
     console.log("  code         :", err.code);          // INVALID_ARGUMENT
     console.log("  shortMessage :", err.shortMessage);
