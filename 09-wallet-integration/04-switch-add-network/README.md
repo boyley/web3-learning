@@ -22,14 +22,14 @@
 
 ```mermaid
 flowchart TD
-    A[用户点击 切换到 Sepolia] --> B[wallet_switchEthereumChain<br/>params: chainId 0xaa36a7]
-    B --> C{是否抛错?}
+    A[用户点击 切换到 Sepolia] --> B["wallet_switchEthereumChain<br/>params: chainId 0xaa36a7"]
+    B --> C{"是否抛错?"}
     C -->|无错误| G[切换成功 ✅]
-    C -->|抛出错误| D{error.code === 4902?}
-    D -->|是, 链未添加| E[wallet_addEthereumChain<br/>传入完整链参数]
+    C -->|抛出错误| D{"error.code === 4902?"}
+    D -->|"是, 链未添加"| E["wallet_addEthereumChain<br/>传入完整链参数"]
     E --> F[再次 wallet_switchEthereumChain]
     F --> G
-    D -->|否, 如 4001 用户拒绝| H[提示用户并终止 ❌]
+    D -->|"否, 如 4001 用户拒绝"| H[提示用户并终止 ❌]
 ```
 
 ## 💻 代码说明

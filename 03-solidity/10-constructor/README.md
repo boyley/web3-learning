@@ -27,18 +27,18 @@
 
 ```mermaid
 flowchart TD
-    A[发起部署交易 tx<br/>to 字段为空, data = 创建字节码 + 构造参数] --> B[EVM 计算出新合约地址]
-    B --> C[执行创建字节码中的<br/>constructor 初始化逻辑]
-    C --> C1[owner = msg.sender]
-    C --> C2[name = 传入参数]
-    C --> C3[给 immutable 赋值<br/>deployer / createdAt]
+    A["发起部署交易 tx<br/>to 字段为空, data = 创建字节码 + 构造参数"] --> B[EVM 计算出新合约地址]
+    B --> C["执行创建字节码中的<br/>constructor 初始化逻辑"]
+    C --> C1["owner = msg.sender"]
+    C --> C2["name = 传入参数"]
+    C --> C3["给 immutable 赋值<br/>deployer / createdAt"]
     C1 --> D[初始状态写入 storage]
     C2 --> D
     C3 --> E[immutable 值烧进运行时字节码]
-    D --> F[创建字节码返回<br/>运行时字节码 runtime bytecode]
+    D --> F["创建字节码返回<br/>运行时字节码 runtime bytecode"]
     E --> F
-    F --> G[运行时字节码存到新地址 ✅<br/>constructor 不在其中]
-    G --> H[之后所有调用只跑运行时字节码<br/>constructor 无法再被调用]
+    F --> G["运行时字节码存到新地址 ✅<br/>constructor 不在其中"]
+    G --> H["之后所有调用只跑运行时字节码<br/>constructor 无法再被调用"]
 ```
 
 > 关键：constructor 属于「创建阶段」，不会进入运行时字节码。部署完成后合约里根本不存在 constructor，自然也无法二次调用。

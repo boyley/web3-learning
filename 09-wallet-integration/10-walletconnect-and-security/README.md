@@ -103,17 +103,17 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    A[收到签名 / 授权请求] --> B{当前域名可信?<br/>是官方站吗}
+    A[收到签名 / 授权请求] --> B{"当前域名可信?<br/>是官方站吗"}
     B -- 否 --> X[拒绝签名 ❌]
-    B -- 是 --> C{看得懂签名字段吗?}
+    B -- 是 --> C{"看得懂签名字段吗?"}
     C -- 看不懂 --> X
-    C -- 看得懂 --> D{是 eth_sign 盲签?<br/>钱包红色警告}
+    C -- 看得懂 --> D{"是 eth_sign 盲签?<br/>钱包红色警告"}
     D -- 是 --> X
-    D -- 否 --> E{是 Permit / approve /<br/>setApprovalForAll?}
-    E -- 是 --> F{spender / operator 可信?<br/>amount 合理非无限?}
+    D -- 否 --> E{"是 Permit / approve /<br/>setApprovalForAll?"}
+    E -- 是 --> F{"spender / operator 可信?<br/>amount 合理非无限?"}
     F -- 否 --> X
-    F -- 是 --> G[谨慎签名 ✅<br/>优先有限额度]
-    E -- 否，仅登录签名 --> H{消息内容无授权含义?}
+    F -- 是 --> G["谨慎签名 ✅<br/>优先有限额度"]
+    E -- 否，仅登录签名 --> H{"消息内容无授权含义?"}
     H -- 否 --> X
     H -- 是 --> G
 ```

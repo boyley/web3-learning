@@ -21,11 +21,11 @@ ENS 是一套部署在**主网**的合约系统（Registry + Resolver）。ether
 
 ```mermaid
 flowchart LR
-    A["vitalik.eth"] -->|resolveName| R1[(ENS Registry<br/>主网合约)]
-    R1 -->|找到对应 Resolver| R2[(Resolver 合约)]
+    A["vitalik.eth"] -->|resolveName| R1["(ENS Registry<br/>主网合约)"]
+    R1 -->|找到对应 Resolver| R2["(Resolver 合约)"]
     R2 -->|addr 记录| B["0xd8dA…6045"]
     R2 -->|text 记录| C["avatar / url / twitter"]
-    B -->|lookupAddress<br/>反向| A
+    B -->|"lookupAddress<br/>反向"| A
     style R1 fill:#e3f2fd
     style R2 fill:#e3f2fd
 ```

@@ -26,7 +26,7 @@ sequenceDiagram
     Note over V: nonReentrant 上锁 🔒
     V->>V: 检查余额 amount>0
     V->>V: 余额清零（Effects）
-    V-->>A: call{value: amount}  转账（Interactions）
+    V-->>A: call{"value: amount"}  转账（Interactions）
     activate A
     A->>V: 恶意回调 withdraw()  再次进入
     V-->>A: revert! 锁未释放 ❌

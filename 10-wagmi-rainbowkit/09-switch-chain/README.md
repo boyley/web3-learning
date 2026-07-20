@@ -21,13 +21,13 @@
 
 ```mermaid
 flowchart TD
-    A[连接钱包] --> B{当前 chainId == 目标链?}
+    A[连接钱包] --> B{"当前 chainId == 目标链?"}
     B -->|是| C[正常读写合约]
     B -->|否| D[显示 Wrong network 提示]
     D --> E["switchChain({ chainId: sepolia.id })"]
     E --> F[钱包弹窗请求切换/添加网络]
-    F -->|用户确认| G[切换成功, chainId 更新]
-    F -->|用户拒绝| H[error, 停留原链]
+    F -->|用户确认| G["切换成功, chainId 更新"]
+    F -->|用户拒绝| H["error, 停留原链"]
     G --> C
 ```
 

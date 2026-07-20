@@ -29,8 +29,8 @@ flowchart LR
     K1["key = 0xAlice"] --> H1["keccak256(key . p)"] --> S1["slot 0x8f... 存 100"]
     K2["key = 0xBob"] --> H2["keccak256(key . p)"] --> S2["slot 0x3c... 存 250"]
     K3["key = 0xCarol(从未写过)"] --> H3["keccak256(key . p)"] --> S3["slot 0xd1... 未写 → 读出默认值 0"]
-    M -.参与哈希.-> H1
-    M -.参与哈希.-> H2
+    M-.->|"参与哈希"| H1
+    M-.->|"参与哈希"| H2
 ```
 
 > 关键点：mapping 没有「一份 key 列表」，只有「按需算槽位」，所以无法遍历、无 length。

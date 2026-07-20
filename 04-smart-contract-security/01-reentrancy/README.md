@@ -36,7 +36,7 @@ sequenceDiagram
     Note over B: balances[A] = 1 ETH<br/>合约内共有 5 ETH
     A->>B: withdraw(1 ETH)
     B->>B: Checks: balances[A] >= 1 ✅
-    B-->>A: call{value:1}("") 转账 → 触发 receive()
+    B-->>A: call{"value:1"}("") 转账 → 触发 receive()
     activate A
     Note over A: receive() 内: 银行还剩 4 ETH
     A->>B: 重入 withdraw(1 ETH)

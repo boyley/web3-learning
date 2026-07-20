@@ -49,7 +49,7 @@ flowchart TD
     M1 --> M2 --> M3 --> M4 --> M5 --> M6
     M5 --> M8
     M4 --> M7
-    M6 -.链上只存 CID.-> LINK["← 衔接 06-token-standards<br/>05-openzeppelin（NFT 合约）"]
+    M6-.->|"链上只存 CID"| LINK["← 衔接 06-token-standards<br/>05-openzeppelin（NFT 合约）"]
 
     style M1 fill:#e3f2fd
     style M2 fill:#e3f2fd

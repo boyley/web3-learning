@@ -9,10 +9,10 @@
 ```mermaid
 flowchart LR
     UI[前端 UI / dApp] --> LIB["ethers / viem<br/>(ABI编解码·签名·单位·事件)"]
-    LIB -->|只读: JSON-RPC| RPC[(公共 RPC 节点)]
+    LIB -->|"只读: JSON-RPC"| RPC["(公共 RPC 节点)"]
     LIB -->|签名/发交易| WALLET[MetaMask 钱包]
     WALLET --> RPC
-    RPC --> CHAIN[(以太坊 / Sepolia)]
+    RPC --> CHAIN["(以太坊 / Sepolia)"]
     style LIB fill:#e3f2fd
 ```
 

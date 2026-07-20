@@ -32,7 +32,7 @@
 ```mermaid
 flowchart TD
     A["balanceOf(0x86..)"] -->|encodeFunctionData| B["calldata<br/>0x70a08231 0000..0199"]
-    B --> C[provider.call / 上链交易]
+    B --> C["provider.call / 上链交易"]
     C --> D["返回 bytes<br/>0x00..0de0b6b3a7640000"]
     D -->|decodeFunctionResult| E["JS 值: 1.0 (BigInt)"]
 

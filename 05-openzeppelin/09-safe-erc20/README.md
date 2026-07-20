@@ -22,11 +22,11 @@ ERC20 标准要求 `transfer`/`approve` 返回 `bool`，但现实很骨感：
 ```mermaid
 flowchart TD
     A["token.safeTransfer(to, amount)"] --> B[SafeERC20 用 low-level call 调用 transfer]
-    B --> C{调用是否成功?}
+    B --> C{"调用是否成功?"}
     C -->|call 失败 revert| E[整笔交易回滚 ❌]
-    C -->|call 成功| D{有无返回值?}
+    C -->|call 成功| D{"有无返回值?"}
     D -->|无返回值| F[视为成功 ✅ 兼容 USDT 类]
-    D -->|有返回值| G{返回值 == true?}
+    D -->|有返回值| G{"返回值 == true?"}
     G -->|true| F
     G -->|false| E
 ```

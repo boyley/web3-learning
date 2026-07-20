@@ -31,9 +31,9 @@ ethers v6 错误对象的关键字段：
 
 ```mermaid
 flowchart TD
-    A[发起调用/交易] --> B{哪一步失败?}
+    A[发起调用/交易] --> B{"哪一步失败?"}
     B -->|参数本地校验| C["INVALID_ARGUMENT<br/>(还没发出去)"]
-    B -->|estimateGas/staticCall<br/>预演 revert| D["CALL_EXCEPTION<br/>读 error.reason"]
+    B -->|"estimateGas/staticCall<br/>预演 revert"| D["CALL_EXCEPTION<br/>读 error.reason"]
     B -->|用户在钱包拒绝| E[ACTION_REJECTED]
     B -->|余额不足| F[INSUFFICIENT_FUNDS]
     B -->|RPC/网络| G[NETWORK_ERROR]

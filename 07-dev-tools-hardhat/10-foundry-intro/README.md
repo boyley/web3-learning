@@ -29,7 +29,7 @@ flowchart LR
     B --> C["forge test<br/>跑 *.t.sol + fuzz"]
     C --> D["forge script / forge create<br/>部署"]
     D --> E["cast call/send<br/>命令行调合约"]
-    F["anvil<br/>本地链"] -.供 test/部署连接.-> C
+    F["anvil<br/>本地链"]-.->|"供 test/部署连接"| C
     F -.-> D
     style B fill:#cde4ff
     style C fill:#d5f5d5

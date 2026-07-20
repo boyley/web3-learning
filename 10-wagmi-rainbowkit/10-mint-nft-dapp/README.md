@@ -24,9 +24,9 @@
 
 ```mermaid
 flowchart TD
-    A[打开页面] --> B{已连接钱包?}
+    A[打开页面] --> B{"已连接钱包?"}
     B -->|否| C["ConnectButton 连接 (02/03)"]
-    B -->|是| D{在 Sepolia?}
+    B -->|是| D{"在 Sepolia?"}
     C --> D
     D -->|否| E["useSwitchChain 切链 (09)"]
     E --> D
@@ -35,7 +35,7 @@ flowchart TD
     G --> H["useWriteContract mint payable (06)"]
     H --> I[钱包签名]
     I --> J["useWaitForTransactionReceipt 等确认 (07)"]
-    J -->|isConfirming| K[显示 上链中...]
+    J -->|isConfirming| K["显示 上链中..."]
     J -->|isSuccess| L[✅ 铸造成功]
     L --> M["refetch 刷新读数据"]
     M --> F

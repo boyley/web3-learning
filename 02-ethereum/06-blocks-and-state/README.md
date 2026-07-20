@@ -41,18 +41,18 @@
 ```mermaid
 flowchart LR
     subgraph B1[区块 N]
-        H1[parentHash: 指向 N-1]
-        S1[stateRoot: 状态指纹 Sn]
+        H1["parentHash: 指向 N-1"]
+        S1["stateRoot: 状态指纹 Sn"]
         T1[交易列表]
     end
     subgraph B2[区块 N+1]
-        H2[parentHash: = 区块N的哈希]
-        S2[stateRoot: 状态指纹 Sn+1]
+        H2["parentHash: = 区块N的哈希"]
+        S2["stateRoot: 状态指纹 Sn+1"]
         T2[交易列表]
     end
     subgraph B3[区块 N+2]
-        H3[parentHash: = 区块N+1的哈希]
-        S3[stateRoot: 状态指纹 Sn+2]
+        H3["parentHash: = 区块N+1的哈希"]
+        S3["stateRoot: 状态指纹 Sn+2"]
         T3[交易列表]
     end
     B1 -->|哈希指针| B2 -->|哈希指针| B3
@@ -62,13 +62,13 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-    ROOT[stateRoot 根哈希<br/>存进区块头] --> N1[中间节点]
+    ROOT["stateRoot 根哈希<br/>存进区块头"] --> N1[中间节点]
     ROOT --> N2[中间节点]
-    N1 --> A1[账户0xAlice<br/>nonce/balance/codeHash/storageRoot]
-    N1 --> A2[账户0xBob<br/>...]
-    N2 --> A3[合约0xUniswap<br/>storageRoot 指向其内部存储树]
-    A3 --> ST[合约存储子树<br/>状态变量键值对]
-    note1[任一账户变化 -> 其哈希变<br/>-> 逐级上传 -> stateRoot 改变]
+    N1 --> A1["账户0xAlice<br/>nonce/balance/codeHash/storageRoot"]
+    N1 --> A2["账户0xBob<br/>..."]
+    N2 --> A3["合约0xUniswap<br/>storageRoot 指向其内部存储树"]
+    A3 --> ST["合约存储子树<br/>状态变量键值对"]
+    note1["任一账户变化 -> 其哈希变<br/>-> 逐级上传 -> stateRoot 改变"]
 ```
 
 ## 💻 代码说明

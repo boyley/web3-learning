@@ -26,10 +26,10 @@
 
 ```mermaid
 flowchart LR
-    A[打开 wizard.openzeppelin.com] --> B[选合约类型<br/>ERC20/721/1155...]
-    B --> C[勾选功能<br/>Mintable/Burnable/Pausable/Ownable...]
-    C --> D[右侧实时生成 .sol 代码]
-    D --> E{下一步?}
+    A["打开 wizard.openzeppelin.com"] --> B["选合约类型<br/>ERC20/721/1155..."]
+    B --> C["勾选功能<br/>Mintable/Burnable/Pausable/Ownable..."]
+    C --> D["右侧实时生成 .sol 代码"]
+    D --> E{"下一步?"}
     E -->|Open in Remix| F[Remix 自动拉取 @openzeppelin/contracts]
     E -->|Copy| G[粘贴到自己工程]
     F --> H[编译 → 部署 → 调用]

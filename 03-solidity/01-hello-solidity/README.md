@@ -27,12 +27,12 @@
 
 ```mermaid
 flowchart TD
-    A[编写 HelloSolidity.sol] --> B[Remix Solidity Compiler<br/>选 0.8.x 编译]
-    B -->|生成 ABI + Bytecode| C[Deploy & Run 面板]
+    A["编写 HelloSolidity.sol"] --> B["Remix Solidity Compiler<br/>选 0.8.x 编译"]
+    B -->|生成 ABI + Bytecode| C["Deploy & Run 面板"]
     C -->|Environment 选 Remix VM| D[点击 Deploy 部署]
-    D --> E[得到部署实例<br/>拥有链上地址]
-    E --> F1[调用 getGreeting / greeting<br/>view 读取, 不花 gas]
-    E --> F2[调用 setGreeting<br/>发交易改状态, 花 gas]
+    D --> E["得到部署实例<br/>拥有链上地址"]
+    E --> F1["调用 getGreeting / greeting<br/>view 读取, 不花 gas"]
+    E --> F2["调用 setGreeting<br/>发交易改状态, 花 gas"]
     F2 -->|状态更新后| F1
 ```
 

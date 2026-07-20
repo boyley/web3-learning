@@ -45,7 +45,7 @@ flowchart TD
     end
     subgraph 成交转账
     E["市场合约: safeTransferFrom(Alice, Bob, 0)"] --> F{"市场是否被 Alice 授权?"}
-    F -->|isApprovedForAll = true| G["_owners[0] = Bob<br/>清除单个授权<br/>emit Transfer(Alice, Bob, 0)"]
+    F -->|"isApprovedForAll = true"| G["_owners[0] = Bob<br/>清除单个授权<br/>emit Transfer(Alice, Bob, 0)"]
     G --> H{"Bob 是合约?"}
     H -->|"是"| I["回调 Bob.onERC721Received<br/>必须返回 0x150b7a02"]
     H -->|"否 (EOA)"| J["直接成功"]

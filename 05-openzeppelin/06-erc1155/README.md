@@ -18,7 +18,7 @@
 
 ```mermaid
 graph TD
-    C[MyMultiToken<br/>单个 ERC1155 合约] --> G["id=0 GOLD<br/>同质化 · 铸 10^6 枚"]
+    C["MyMultiToken<br/>单个 ERC1155 合约"] --> G["id=0 GOLD<br/>同质化 · 铸 10^6 枚"]
     C --> S["id=1 SWORD<br/>非同质化 · 铸 1 枚"]
     C --> P["id=2..n 其它道具..."]
 

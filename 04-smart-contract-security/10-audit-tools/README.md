@@ -47,8 +47,8 @@ forge fmt         # 格式化
 ```mermaid
 flowchart LR
     A[编写合约] --> B[本地 Slither 静态扫描]
-    B --> C{有告警?}
-    C -->|是| D[逐条核实<br/>修复或标注误报]
+    B --> C{"有告警?"}
+    C -->|是| D["逐条核实<br/>修复或标注误报"]
     D --> B
     C -->|否| E[Mythril 符号执行 + Foundry 测试/fuzz]
     E --> F[人工按清单逐项审计]

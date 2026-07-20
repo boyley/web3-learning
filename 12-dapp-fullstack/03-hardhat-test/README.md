@@ -34,14 +34,14 @@
 
 ```mermaid
 flowchart LR
-    A[npx hardhat test] --> B[编译 contracts/*.sol]
+    A[npx hardhat test] --> B["编译 contracts/*.sol"]
     B --> C[启动内存版 Hardhat 链]
-    C --> D[loadFixture: 部署 MyNFT 一次并快照]
+    C --> D["loadFixture: 部署 MyNFT 一次并快照"]
     D --> E[逐个 it 用例执行]
-    E --> F{断言通过?}
+    E --> F{"断言通过?"}
     F -->|是| G[通过 绿色]
     F -->|否| H[失败 红色并打印差异]
-    E -.每个用例前.-> D
+    E-.->|"每个用例前"| D
 ```
 
 ## 💻 代码说明

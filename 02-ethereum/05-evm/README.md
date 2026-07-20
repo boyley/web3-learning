@@ -38,15 +38,15 @@ EVM 执行一段字节码的过程（以 `3 + 5` 为例）：
 
 ```mermaid
 flowchart TD
-    A[合约字节码: 60 03 60 05 01 ...] --> B[EVM 取下一条 opcode]
-    B --> C{是什么 opcode?}
-    C -->|PUSH1 0x03| D[把 3 压入栈, 扣 3 gas]
-    D --> E[PUSH1 0x05: 把 5 压入栈, 扣 3 gas]
-    E --> F[ADD: 弹出 5 和 3, 相加, 把 8 压回栈, 扣 3 gas]
-    F --> G{gas 用超了吗?}
-    G -->|否, 还有指令| B
-    G -->|否, 执行完| H[得到结果, 提交状态变更 S']
-    G -->|是 out of gas| I[整笔交易回滚, 已花 gas 不退]
+    A["合约字节码: 60 03 60 05 01 ..."] --> B[EVM 取下一条 opcode]
+    B --> C{"是什么 opcode?"}
+    C -->|PUSH1 0x03| D["把 3 压入栈, 扣 3 gas"]
+    D --> E["PUSH1 0x05: 把 5 压入栈, 扣 3 gas"]
+    E --> F["ADD: 弹出 5 和 3, 相加, 把 8 压回栈, 扣 3 gas"]
+    F --> G{"gas 用超了吗?"}
+    G -->|"否, 还有指令"| B
+    G -->|"否, 执行完"| H["得到结果, 提交状态变更 S'"]
+    G -->|是 out of gas| I["整笔交易回滚, 已花 gas 不退"]
 ```
 
 EVM 的数据区与「贵/便宜」关系：
@@ -54,9 +54,9 @@ EVM 的数据区与「贵/便宜」关系：
 ```mermaid
 flowchart LR
     subgraph EVM 执行环境
-        S[栈 Stack<br/>1024 × 256bit<br/>极便宜, 不持久]
-        M[内存 Memory<br/>字节数组<br/>便宜, 交易内有效]
-        ST[存储 Storage<br/>Merkle Trie<br/>★很贵★ 永久上链]
+        S["栈 Stack<br/>1024 × 256bit<br/>极便宜, 不持久"]
+        M["内存 Memory<br/>字节数组<br/>便宜, 交易内有效"]
+        ST["存储 Storage<br/>Merkle Trie<br/>★很贵★ 永久上链"]
     end
     OP[opcode 执行] --> S
     OP --> M

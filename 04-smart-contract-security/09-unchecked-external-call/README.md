@@ -24,7 +24,7 @@
 ```mermaid
 flowchart TD
     A["用户 withdrawBad(1 ETH)"] --> B["balances 先减 1 ETH"]
-    B --> C["call{value:1}('') 转账"]
+    B --> C["call{"value:1"}('') 转账"]
     C --> D{"对方是拒收合约<br/>call 返回 false"}
     D --> E["❌ 返回值被忽略,继续执行"]
     E --> F["账本: 减了 1 ETH<br/>实际: 钱没转出去"]

@@ -18,7 +18,7 @@
 
 ```mermaid
 flowchart TD
-    A[攻击者发现 setOwner 无权限校验] --> B[直接调用 setOwner<br/>把 owner 改成自己]
+    A[攻击者发现 setOwner 无权限校验] --> B["直接调用 setOwner<br/>把 owner 改成自己"]
     B --> C[现在自己是 owner]
     C --> D[调用 withdrawAll 提走全部资金]
     D --> E[合约被完全接管 💀]

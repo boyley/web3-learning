@@ -34,12 +34,12 @@
 
 ```mermaid
 flowchart LR
-    subgraph 输入（任意长度）
+    subgraph sg87988["输入（任意长度）"]
       I1["'hello'"]
       I2["一本书的全文"]
       I3["一整个区块的数据"]
     end
-    I1 --> H[SHA-256<br/>单向压缩函数]
+    I1 --> H["SHA-256<br/>单向压缩函数"]
     I2 --> H
     I3 --> H
     H --> O["固定 256 bit 输出<br/>64 个 hex 字符<br/>例：2cf24dba5fb0a30e..."]
@@ -51,7 +51,7 @@ flowchart LR
 flowchart TB
     A["'...转账 100 元'"] -->|SHA-256| HA["a1b2c3...（指纹1）"]
     B["'...转账 900 元'<br/>只改了一个数字"] -->|SHA-256| HB["7f9e0d...（指纹2）"]
-    HA -. 约 50% 的 bit 不同 .-> HB
+    HA-.->|"约 50% 的 bit 不同"| HB
 ```
 
 ## 💻 代码说明

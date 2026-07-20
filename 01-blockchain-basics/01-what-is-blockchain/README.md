@@ -46,20 +46,20 @@
 
 ```mermaid
 flowchart TB
-    subgraph 全网节点（每个都存一份相同账本）
+    subgraph sg61424["全网节点（每个都存一份相同账本）"]
       direction LR
       NA[节点 A]
       NB[节点 B]
       NC[节点 C]
     end
-    NA <-->|广播 & 同步| NB
-    NB <-->|广播 & 同步| NC
-    NA <-->|广播 & 同步| NC
+    NA <-->|"广播 & 同步"| NB
+    NB <-->|"广播 & 同步"| NC
+    NA <-->|"广播 & 同步"| NC
 
     subgraph 每个节点内部的哈希链
-      G[创世块<br/>prevHash=000...] --> B1[区块 #1<br/>prevHash=H0]
-      B1 --> B2[区块 #2<br/>prevHash=H1]
-      B2 --> B3[区块 #3<br/>prevHash=H2]
+      G["创世块<br/>prevHash=000..."] --> B1["区块 #1<br/>prevHash=H0"]
+      B1 --> B2["区块 #2<br/>prevHash=H1"]
+      B2 --> B3["区块 #3<br/>prevHash=H2"]
     end
 ```
 

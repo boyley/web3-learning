@@ -38,20 +38,20 @@
 ```mermaid
 graph TD
     V[值类型 Value Types]
-    V --> B[bool<br/>true / false]
+    V --> B["bool<br/>true / false"]
     V --> N[整型 Integer]
     V --> A[address]
     V --> BY[定长字节 bytesN]
     V --> E[enum 枚举]
 
-    N --> U[uint8 / uint16 / ... / uint256<br/>无符号, 默认 0]
-    N --> I[int8 / int16 / ... / int256<br/>有符号, 可负]
+    N --> U["uint8 / uint16 / ... / uint256<br/>无符号, 默认 0"]
+    N --> I["int8 / int16 / ... / int256<br/>有符号, 可负"]
 
-    A --> A1[address<br/>普通地址]
+    A --> A1["address<br/>普通地址"]
     A --> A2["address payable<br/>可转账 .transfer/.send"]
-    A1 -. "payable(addr)" .-> A2
+    A1-.->|""payable(addr)""| A2
 
-    BY --> BY1[bytes1 ... bytes32<br/>定长, 省 gas]
+    BY --> BY1["bytes1 ... bytes32<br/>定长, 省 gas"]
 ```
 
 ## 💻 代码说明

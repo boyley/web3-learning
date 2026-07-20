@@ -25,14 +25,14 @@
 
 ```mermaid
 flowchart TD
-    A[攻击合约出高价成为 King] --> B[新玩家想顶替<br/>出更高价]
-    B --> C[VulnerableKing 尝试<br/>transfer 退款给旧王 = 攻击合约]
-    C --> D{攻击合约 receive<br/>直接 revert 拒收}
-    D --> E[整笔交易回滚<br/>新玩家无法登基]
-    E --> F[王位永久锁死<br/>没人能再玩 💀]
+    A[攻击合约出高价成为 King] --> B["新玩家想顶替<br/>出更高价"]
+    B --> C["VulnerableKing 尝试<br/>transfer 退款给旧王 = 攻击合约"]
+    C --> D{"攻击合约 receive<br/>直接 revert 拒收"}
+    D --> E["整笔交易回滚<br/>新玩家无法登基"]
+    E --> F["王位永久锁死<br/>没人能再玩 💀"]
 
-    G[SecureKing: 记账 pendingWithdrawals] --> H[新玩家正常登基]
-    H --> I[旧王自己 withdraw<br/>拒收只坑他自己 ✅]
+    G["SecureKing: 记账 pendingWithdrawals"] --> H[新玩家正常登基]
+    H --> I["旧王自己 withdraw<br/>拒收只坑他自己 ✅"]
 
     style F fill:#ff9090
     style I fill:#c0ffc0

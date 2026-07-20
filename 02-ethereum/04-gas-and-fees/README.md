@@ -47,24 +47,24 @@
 
 ```mermaid
 flowchart TD
-    A[交易执行] --> B[EVM 累计每个 opcode 的 Gas -> gasUsed]
+    A[交易执行] --> B["EVM 累计每个 opcode 的 Gas -> gasUsed"]
     P1[协议按上区块拥堵算出 baseFee] --> C
     U[用户设 maxFeePerGas / maxPriorityFeePerGas] --> C
-    B --> C[每单位实付 = min(maxFee, baseFee + priorityFee)]
-    C --> D[手续费 = gasUsed × 每单位实付]
-    D --> E1[baseFee × gasUsed 部分 -> 🔥销毁]
-    D --> E2[priorityFee × gasUsed 部分 -> 给验证者]
-    D --> E3[maxFee 多出的部分 -> 退还给用户]
+    B --> C["每单位实付 = min(maxFee, baseFee + priorityFee)"]
+    C --> D["手续费 = gasUsed × 每单位实付"]
+    D --> E1["baseFee × gasUsed 部分 -> 🔥销毁"]
+    D --> E2["priorityFee × gasUsed 部分 -> 给验证者"]
+    D --> E3["maxFee 多出的部分 -> 退还给用户"]
 ```
 
 baseFee 如何随区块拥堵自动调整（负反馈）：
 
 ```mermaid
 flowchart LR
-    B0[区块 N 的用量] --> Q{用量 vs 目标50%?}
-    Q -->|高于目标, 拥堵| UP[下一区块 baseFee ↑ 最多 +12.5%]
+    B0[区块 N 的用量] --> Q{"用量 vs 目标50%?"}
+    Q -->|"高于目标, 拥堵"| UP["下一区块 baseFee ↑ 最多 +12.5%"]
     Q -->|等于目标| SAME[baseFee 基本不变]
-    Q -->|低于目标, 空闲| DOWN[下一区块 baseFee ↓]
+    Q -->|"低于目标, 空闲"| DOWN[下一区块 baseFee ↓]
     UP --> B1[区块 N+1 的 baseFee]
     SAME --> B1
     DOWN --> B1

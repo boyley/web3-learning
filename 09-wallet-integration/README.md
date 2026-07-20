@@ -34,19 +34,19 @@ window.ethereum.on('accountsChanged', handler);
 
 ```mermaid
 flowchart TD
-    A[01 检测 Provider<br/>是否装了钱包] --> B[02 请求连接<br/>eth_requestAccounts]
-    B --> C[03 读账户/链/余额<br/>eth_accounts / eth_chainId]
-    C --> D[04 切换/添加网络<br/>wallet_switchEthereumChain]
+    A["01 检测 Provider<br/>是否装了钱包"] --> B["02 请求连接<br/>eth_requestAccounts"]
+    B --> C["03 读账户/链/余额<br/>eth_accounts / eth_chainId"]
+    C --> D["04 切换/添加网络<br/>wallet_switchEthereumChain"]
 
-    D --> E{与钱包做什么?}
-    E -->|证明身份| F[05 消息签名登录<br/>personal_sign]
-    F --> G[06 结构化签名<br/>EIP-712]
-    E -->|花钱/上链| H[07 发交易<br/>eth_sendTransaction]
+    D --> E{"与钱包做什么?"}
+    E -->|证明身份| F["05 消息签名登录<br/>personal_sign"]
+    F --> G["06 结构化签名<br/>EIP-712"]
+    E -->|花钱/上链| H["07 发交易<br/>eth_sendTransaction"]
 
-    G --> I[08 事件监听<br/>账户/链变化]
+    G --> I["08 事件监听<br/>账户/链变化"]
     H --> I
-    I --> J[09 多钱包发现<br/>EIP-6963]
-    J --> K[10 WalletConnect 扫码<br/>+ 签名安全防范]
+    I --> J["09 多钱包发现<br/>EIP-6963"]
+    J --> K["10 WalletConnect 扫码<br/>+ 签名安全防范"]
 
     style A fill:#1a2232,stroke:#f6851b,color:#e6edf3
     style K fill:#3a1414,stroke:#f85149,color:#e6edf3

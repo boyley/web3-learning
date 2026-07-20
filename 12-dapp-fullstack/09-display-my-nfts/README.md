@@ -35,14 +35,14 @@
 
 ```mermaid
 flowchart TD
-    A[useAccount 拿到我的地址] --> B[useReadContract: balanceOf 我 = count]
-    B --> C{count > 0 ?}
+    A[useAccount 拿到我的地址] --> B["useReadContract: balanceOf 我 = count"]
+    B --> C{"count > 0 ?"}
     C -->|否| Z[显示「还没有 NFT」]
-    C -->|是| D[useReadContracts:<br/>tokenOfOwnerByIndex 我, 0..count-1]
+    C -->|是| D["useReadContracts:<br/>tokenOfOwnerByIndex 我, 0..count-1"]
     D --> E[得到 tokenId 列表]
-    E --> F[useReadContracts:<br/>tokenURI 每个 id]
+    E --> F["useReadContracts:<br/>tokenURI 每个 id"]
     F --> G[得到 ipfs 元数据地址列表]
-    G --> H[fetch 网关: 取每份 JSON]
+    G --> H["fetch 网关: 取每份 JSON"]
     H --> I[读出 name / image]
     I --> J[image 的 ipfs 转网关地址]
     J --> K[渲染 NFT 网格]

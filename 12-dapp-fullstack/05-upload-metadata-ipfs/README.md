@@ -37,13 +37,13 @@ IPFS 节点默认只缓存自己用到的文件，不会永久替你保存。要
 
 ```mermaid
 flowchart TD
-    A[本地图片 nft.png] -->|pinFileToIPFS| B[图片 CID]
-    B --> C[构造元数据 JSON<br/>image = ipfs://图片CID]
+    A["本地图片 nft.png"] -->|pinFileToIPFS| B[图片 CID]
+    B --> C["构造元数据 JSON<br/>image = ipfs://图片CID"]
     C -->|pinJSONToIPFS| D[元数据 CID]
     D --> E["tokenURI = ipfs://元数据CID"]
-    E --> F[传给合约 mint uri<br/>模块 08]
+    E --> F["传给合约 mint uri<br/>模块 08"]
 
-    subgraph 展示时反向解析（模块 09）
+    subgraph sg60569["展示时反向解析（模块 09）"]
       G[前端读到 tokenURI] --> H[网关取元数据 JSON]
       H --> I[读出 image 字段的 ipfs 地址]
       I --> J[网关取图片并渲染]

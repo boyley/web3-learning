@@ -32,8 +32,8 @@ flowchart LR
     F --> G[08 铸造流程]
     G --> H[09 展示我的 NFT]
     H --> I[10 前端上线]
-    C -. 合约地址/ABI .-> E
-    D -. tokenURI .-> G
+    C-.->|"合约地址/ABI"| E
+    D-.->|"tokenURI"| G
 ```
 
 ## 💻 代码说明

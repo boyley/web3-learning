@@ -24,11 +24,11 @@
 
 ```mermaid
 flowchart TD
-    A[用户调用 setSecret] --> B{onlyOwner 检查<br/>msg.sender == owner ?}
-    B -->|是| C[执行函数体<br/>修改 secretNumber]
-    B -->|否| D[revert<br/>OwnableUnauthorizedAccount]
+    A[用户调用 setSecret] --> B{"onlyOwner 检查<br/>msg.sender == owner ?"}
+    B -->|是| C["执行函数体<br/>修改 secretNumber"]
+    B -->|否| D["revert<br/>OwnableUnauthorizedAccount"]
     C --> E[交易成功]
-    D --> F[交易回滚, 状态不变]
+    D --> F["交易回滚, 状态不变"]
 ```
 
 ## 💻 代码说明

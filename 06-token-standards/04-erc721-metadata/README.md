@@ -67,10 +67,10 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-    subgraph 链上 On-chain[链上（贵，只存指针）]
+    subgraph 链上 On-chain["链上（贵，只存指针）"]
     T["tokenURI(tokenId)<br/>返回一条 URL"]
     end
-    subgraph 链下 Off-chain[链下 IPFS（便宜，存内容）]
+    subgraph 链下 Off-chain["链下 IPFS（便宜，存内容）"]
     J["metadata JSON<br/>name/description/image/attributes"]
     I["图片 / 视频文件"]
     end

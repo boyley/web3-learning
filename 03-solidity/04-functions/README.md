@@ -40,7 +40,7 @@ view / pure / 普通函数对 storage 的读写权限差异：
 ```mermaid
 flowchart LR
     subgraph S["合约 Storage（状态变量 total）"]
-        ST[(total)]
+        ST["(total)"]
     end
 
     P["pure 函数<br/>multiply / add"] -. 不读 .-x ST

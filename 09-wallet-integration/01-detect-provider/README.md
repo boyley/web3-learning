@@ -34,12 +34,12 @@ if (typeof window.ethereum !== 'undefined') {
 
 ```mermaid
 flowchart TD
-  A[页面加载] --> B{window.ethereum 存在?}
-  B -- 否 --> C[提示：未检测到钱包<br/>引导安装 MetaMask]
-  B -- 是 --> D{存在 providers 数组?}
-  D -- 是 --> E[多插件冲突 ⚠️<br/>window.ethereum 指向不确定<br/>建议改用 EIP-6963 模块09]
-  D -- 否 --> F{isMetaMask?}
-  F -- 是 --> G[结论：唯一 MetaMask<br/>可进入连接账户]
+  A[页面加载] --> B{"window.ethereum 存在?"}
+  B -- 否 --> C["提示：未检测到钱包<br/>引导安装 MetaMask"]
+  B -- 是 --> D{"存在 providers 数组?"}
+  D -- 是 --> E["多插件冲突 ⚠️<br/>window.ethereum 指向不确定<br/>建议改用 EIP-6963 模块09"]
+  D -- 否 --> F{"isMetaMask?"}
+  F -- 是 --> G["结论：唯一 MetaMask<br/>可进入连接账户"]
   F -- 否 --> H[结论：其它兼容 EIP-1193 的钱包]
 ```
 

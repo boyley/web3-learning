@@ -25,7 +25,7 @@
 
 ```mermaid
 flowchart LR
-    A["useBalance({ address, token? })"] --> B{token 是否传入?}
+    A["useBalance({ address, token? })"] --> B{"token 是否传入?"}
     B -->|否| C["查原生币: eth_getBalance"]
     B -->|是| D["调 ERC-20 合约 balanceOf(address)"]
     C --> E["返回 bigint value (wei)"]

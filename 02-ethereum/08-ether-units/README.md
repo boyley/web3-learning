@@ -39,8 +39,8 @@
 
 ```mermaid
 flowchart LR
-    W[wei<br/>最小整数单位] -->|×10^9| G[gwei<br/>Gas 价格常用]
-    G -->|×10^9| E[ether<br/>展示余额常用]
+    W["wei<br/>最小整数单位"] -->|×10^9| G["gwei<br/>Gas 价格常用"]
+    G -->|×10^9| E["ether<br/>展示余额常用"]
     E -->|÷10^9| G
     G -->|÷10^9| W
 ```
@@ -49,9 +49,9 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-    IN[用户输入 '1.5 ETH'] -->|parseEther| WEI[内部: 1500000000000000000n wei]
-    WEI -->|BigInt 精确运算, 不丢精度| WEI2[计算后仍是 wei]
-    WEI2 -->|formatEther| OUT[展示 '1.5 ETH']
+    IN["用户输入 '1.5 ETH'"] -->|parseEther| WEI["内部: 1500000000000000000n wei"]
+    WEI -->|"BigInt 精确运算, 不丢精度"| WEI2[计算后仍是 wei]
+    WEI2 -->|formatEther| OUT["展示 '1.5 ETH'"]
     WEI2 -->|formatUnits gwei| OUTG[展示 gwei]
 ```
 

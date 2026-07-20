@@ -53,10 +53,10 @@ classDiagram
 
 ```mermaid
 flowchart TD
-    A[用户调用 mint uri] --> B{已铸造 < MAX_SUPPLY ?}
-    B -->|否| R[revert: sold out]
-    B -->|是| C[tokenId = _nextTokenId++]
-    C --> D[_safeMint 给 msg.sender]
+    A[用户调用 mint uri] --> B{"已铸造 < MAX_SUPPLY ?"}
+    B -->|否| R["revert: sold out"]
+    B -->|是| C["tokenId = _nextTokenId++"]
+    C --> D["_safeMint 给 msg.sender"]
     D --> E[_setTokenURI 绑定 ipfs 地址]
     E --> F[emit Minted 事件]
     F --> G[返回 tokenId]

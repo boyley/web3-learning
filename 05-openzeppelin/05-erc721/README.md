@@ -20,10 +20,10 @@
 
 ```mermaid
 flowchart TD
-    A[owner 调用 safeMint to, uri] --> B[tokenId = _nextTokenId++]
-    B --> C[_safeMint to, tokenId]
-    C --> D{to 是合约?}
-    D -->|是| E{实现 onERC721Received?}
+    A["owner 调用 safeMint to, uri"] --> B["tokenId = _nextTokenId++"]
+    B --> C["_safeMint to, tokenId"]
+    C --> D{"to 是合约?"}
+    D -->|是| E{"实现 onERC721Received?"}
     E -->|否| F[revert 防锁死]
     E -->|是| G[铸造成功]
     D -->|否 普通地址| G

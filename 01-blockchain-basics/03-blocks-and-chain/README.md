@@ -45,20 +45,20 @@
 
 ```mermaid
 flowchart LR
-    subgraph G[区块 #0 · 创世块]
-      G1[prevHash = 000...000]
+    subgraph G["区块 #0 · 创世块"]
+      G1["prevHash = 000...000"]
       G2[data]
-      G3[hash = H0]
+      G3["hash = H0"]
     end
-    subgraph B1[区块 #1]
-      B1a[prevHash = H0]
+    subgraph B1["区块 #1"]
+      B1a["prevHash = H0"]
       B1b[data]
-      B1c[hash = H1]
+      B1c["hash = H1"]
     end
-    subgraph B2[区块 #2]
-      B2a[prevHash = H1]
+    subgraph B2["区块 #2"]
+      B2a["prevHash = H1"]
       B2b[data]
-      B2c[hash = H2]
+      B2c["hash = H2"]
     end
     G3 --> B1a
     B1c --> B2a
@@ -68,12 +68,12 @@ flowchart LR
 
 ```mermaid
 flowchart TB
-    X[改动区块 #1 的 data] --> H1[#1 的 hash 变化]
-    H1 --> C{#2.prevHash == #1.hash ?}
-    C -->|不相等| BR[链在 #2 处断裂 → 校验失败]
-    H1 -.攻击者补算 #1.hash.-> N[但 #2.prevHash 仍是旧值]
+    X["改动区块 #1 的 data"] --> H1["#1 的 hash 变化"]
+    H1 --> C{"#2.prevHash == #1.hash ?"}
+    C -->|不相等| BR["链在 #2 处断裂 → 校验失败"]
+    H1-.->|"攻击者补算 #1.hash"| N["但 #2.prevHash 仍是旧值"]
     N --> C
-    BR --> COST[要圆谎需重算其后所有区块<br/>并战胜全网共识 → 天价成本]
+    BR --> COST["要圆谎需重算其后所有区块<br/>并战胜全网共识 → 天价成本"]
 ```
 
 ## 💻 代码说明

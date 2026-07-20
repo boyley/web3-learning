@@ -24,13 +24,13 @@ flowchart TB
       W[钱包 MetaMask]
     end
     subgraph 前端 链下
-      FE[React + wagmi + RainbowKit<br/>模块 06-10]
+      FE["React + wagmi + RainbowKit<br/>模块 06-10"]
     end
     subgraph 去中心化存储
-      IPFS[(IPFS / Pinata<br/>图片 + 元数据<br/>模块 05)]
+      IPFS["(IPFS / Pinata<br/>图片 + 元数据<br/>模块 05)"]
     end
     subgraph 区块链 Sepolia
-      SC[MyNFT 合约 · ERC721<br/>模块 02-04]
+      SC["MyNFT 合约 · ERC721<br/>模块 02-04"]
     end
 
     U --> FE
@@ -38,7 +38,7 @@ flowchart TB
     FE -->|读 balanceOf / tokenURI| SC
     W -->|发送 mint 交易| SC
     FE -->|拉取 ipfs 图片| IPFS
-    SC -.每枚 NFT 只存 ipfs 指针.-> IPFS
+    SC-.->|"每枚 NFT 只存 ipfs 指针"| IPFS
 ```
 
 学习路线（按编号推进）：

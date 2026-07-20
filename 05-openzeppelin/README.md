@@ -37,19 +37,19 @@ OpenZeppelin Contracts（OZ）是以太坊生态**最广泛使用、久经实战
 
 ```mermaid
 flowchart TD
-    A[01 OZ 简介 + Wizard<br/>建立整体认知] --> B[权限基础]
+    A["01 OZ 简介 + Wizard<br/>建立整体认知"] --> B[权限基础]
     subgraph B[权限基础]
-      B1[02 Ownable<br/>单管理员] --> B2[03 AccessControl<br/>多角色 RBAC]
+      B1["02 Ownable<br/>单管理员"] --> B2["03 AccessControl<br/>多角色 RBAC"]
     end
     B --> C[代币三兄弟]
     subgraph C[代币标准]
-      C1[04 ERC20<br/>同质化] --> C2[05 ERC721<br/>NFT] --> C3[06 ERC1155<br/>多代币]
+      C1["04 ERC20<br/>同质化"] --> C2["05 ERC721<br/>NFT"] --> C3["06 ERC1155<br/>多代币"]
     end
     C --> D[安全组件]
     subgraph D[安全组件]
-      D1[07 Pausable<br/>急停] --> D2[08 ReentrancyGuard<br/>防重入] --> D3[09 SafeERC20<br/>安全转账]
+      D1["07 Pausable<br/>急停"] --> D2["08 ReentrancyGuard<br/>防重入"] --> D3["09 SafeERC20<br/>安全转账"]
     end
-    D --> E[10 可升级 UUPS 代理<br/>进阶综合]
+    D --> E["10 可升级 UUPS 代理<br/>进阶综合"]
 
     style A fill:#e3f2fd
     style E fill:#fff3e0

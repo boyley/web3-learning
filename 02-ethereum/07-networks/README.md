@@ -39,15 +39,15 @@ L2 也各有自己的测试网（如 Arbitrum Sepolia、Optimism Sepolia）。
 ```mermaid
 flowchart TD
     ETH[以太坊生态] --> L1[Layer 1 以太坊链]
-    L1 --> MAIN[主网 Mainnet<br/>chainId 1<br/>真实资产, 生产]
+    L1 --> MAIN["主网 Mainnet<br/>chainId 1<br/>真实资产, 生产"]
     L1 --> TEST[测试网]
-    TEST --> SEP[Sepolia 11155111<br/>★应用开发默认★]
-    TEST --> HOO[Hoodi 560048<br/>协议/验证者测试]
+    TEST --> SEP["Sepolia 11155111<br/>★应用开发默认★"]
+    TEST --> HOO["Hoodi 560048<br/>协议/验证者测试"]
 
     ETH --> L2[Layer 2 扩容]
-    L2 --> OP[Optimistic Rollup<br/>Arbitrum/Optimism/Base<br/>乐观+挑战期]
-    L2 --> ZK[ZK Rollup<br/>zkSync/Starknet/Scroll<br/>零知识证明]
-    L2 -.批量交易+证明 提交回.-> MAIN
+    L2 --> OP["Optimistic Rollup<br/>Arbitrum/Optimism/Base<br/>乐观+挑战期"]
+    L2 --> ZK["ZK Rollup<br/>zkSync/Starknet/Scroll<br/>零知识证明"]
+    L2-.->|"批量交易+证明 提交回"| MAIN
 ```
 
 Rollup 如何把交易「卷」回主网（继承主网安全）：

@@ -35,19 +35,19 @@
 
 ```mermaid
 flowchart TD
-    Start([开始: 合约安全]) --> R[01 重入攻击<br/>最经典·必学]
-    R --> AC[02 访问控制<br/>最常见的缺失]
+    Start([开始: 合约安全]) --> R["01 重入攻击<br/>最经典·必学"]
+    R --> AC["02 访问控制<br/>最常见的缺失"]
     AC --> INT[03 整数溢出/下溢]
 
-    INT --> Auth[04 tx.origin 钓鱼]
+    INT --> Auth["04 tx.origin 钓鱼"]
     Auth --> Rand[05 不安全随机数]
     Rand --> FR[06 抢跑 / MEV]
 
     FR --> DoS[07 拒绝服务 DoS]
-    DoS --> DC[08 delegatecall 存储冲突<br/>代理进阶]
+    DoS --> DC["08 delegatecall 存储冲突<br/>代理进阶"]
     DC --> Call[09 未检查外部调用]
 
-    Call --> Tools[10 审计工具 + 清单<br/>综合演练]
+    Call --> Tools["10 审计工具 + 清单<br/>综合演练"]
     Tools --> End([能独立发现<br/>并修复漏洞 ✅])
 
     subgraph 基础三漏洞

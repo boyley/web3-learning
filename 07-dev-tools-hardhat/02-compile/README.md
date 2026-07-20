@@ -27,7 +27,7 @@ flowchart TD
     C --> E["bytecode (字节码)"]
     D --> F["artifacts/.../Box.json"]
     E --> F
-    B -.命中缓存.-> G["cache/<br/>源码未变则跳过"]
+    B-.->|"命中缓存"| G["cache/<br/>源码未变则跳过"]
     F --> H["ethers / 前端<br/>用 ABI + bytecode 部署与调用"]
     style B fill:#cde4ff
     style F fill:#d5f5d5

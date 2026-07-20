@@ -27,10 +27,10 @@ flowchart LR
         A1[JsonRpcProvider] 
         A2[BrowserProvider]
     end
-    A1 -- "HTTP JSON-RPC" --> N[(公共 RPC 节点<br/>Sepolia)]
+    A1 -- "HTTP JSON-RPC" --> N["(公共 RPC 节点<br/>Sepolia)"]
     A2 -- "EIP-1193 window.ethereum" --> W[MetaMask 钱包]
-    W -- "转发 JSON-RPC" --> N2[(钱包内置节点/Infura)]
-    N --> C[(以太坊区块链)]
+    W -- "转发 JSON-RPC" --> N2["(钱包内置节点/Infura)"]
+    N --> C["(以太坊区块链)"]
     N2 --> C
 ```
 

@@ -71,8 +71,8 @@ sequenceDiagram
 ```mermaid
 flowchart TD
     A[内存池中一堆待打包交易] --> B[按 priority fee 小费 从高到低排序]
-    B --> C{累计 gas <= 区块 gas 上限?}
-    C -->|是, 继续装| D[打包该交易]
+    B --> C{"累计 gas <= 区块 gas 上限?"}
+    C -->|"是, 继续装"| D[打包该交易]
     D --> C
     C -->|超出上限| E[余下交易留到下一个区块]
     D --> F[出块 → 上链]

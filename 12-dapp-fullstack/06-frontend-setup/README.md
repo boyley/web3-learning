@@ -47,15 +47,15 @@ frontend/
 ```mermaid
 flowchart LR
     subgraph 前端配置
-      ADDR[address.ts<br/>合约地址]
-      ABI[abi.ts<br/>接口说明书]
-      CFG[wagmi.ts<br/>链 + 钱包 + RPC]
+      ADDR["address.ts<br/>合约地址"]
+      ABI["abi.ts<br/>接口说明书"]
+      CFG["wagmi.ts<br/>链 + 钱包 + RPC"]
     end
-    HOOK[wagmi hooks<br/>useReadContract / useWriteContract]
+    HOOK["wagmi hooks<br/>useReadContract / useWriteContract"]
     ADDR --> HOOK
     ABI --> HOOK
     CFG --> HOOK
-    HOOK -->|编码调用 / 解码返回| CHAIN[(MyNFT @ Sepolia)]
+    HOOK -->|编码调用 / 解码返回| CHAIN["(MyNFT @ Sepolia)"]
 ```
 
 ## 💻 代码说明

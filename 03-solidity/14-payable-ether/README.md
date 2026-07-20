@@ -46,7 +46,7 @@ sequenceDiagram
     U->>C: withdraw(0.4 ether)
     C->>C: 1. Checks 校验余额
     C->>C: 2. Effects 先扣账本
-    C->>U: 3. Interactions call{value:0.4}("")
+    C->>U: 3. Interactions call{"value:0.4"}("")
     C-->>U: emit Withdrawn
 ```
 
@@ -54,11 +54,11 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    Start([收到一笔调用]) --> Empty{msg.data 为空?}
-    Empty -- 是（纯转账） --> HasRecv{合约有 receive()?}
+    Start([收到一笔调用]) --> Empty{"msg.data 为空?"}
+    Empty -- 是（纯转账） --> HasRecv{"合约有 receive()?"}
     HasRecv -- 有 --> R["执行 receive()"]
-    HasRecv -- 没有 --> Fpay{fallback 是 payable?}
-    Empty -- 否（带函数数据） --> Match{匹配到某个函数?}
+    HasRecv -- 没有 --> Fpay{"fallback 是 payable?"}
+    Empty -- 否（带函数数据） --> Match{"匹配到某个函数?"}
     Match -- 匹配到 --> Fn["执行对应函数"]
     Match -- 匹配不到 --> Fpay
     Fpay -- 是 --> F["执行 fallback()"]

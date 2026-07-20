@@ -20,7 +20,7 @@
 ```mermaid
 flowchart TD
     subgraph 管理层
-      ADMIN[DEFAULT_ADMIN_ROLE<br/>超级管理员]
+      ADMIN["DEFAULT_ADMIN_ROLE<br/>超级管理员"]
     end
     ADMIN -->|grantRole MINTER_ROLE| M1[铸币者 Alice]
     ADMIN -->|grantRole MINTER_ROLE| M2[铸币者 Bob]
@@ -28,7 +28,7 @@ flowchart TD
     ADMIN -.->|revokeRole 随时撤销| M1
 
     M1 -->|"onlyRole MINTER_ROLE 通过"| MINT[mint 成功]
-    B1 -->|"onlyRole MINTER_ROLE 不通过"| X[revert: 无此角色]
+    B1 -->|"onlyRole MINTER_ROLE 不通过"| X["revert: 无此角色"]
 ```
 
 ## 💻 代码说明

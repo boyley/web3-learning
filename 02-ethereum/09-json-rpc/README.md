@@ -57,7 +57,7 @@ ethers 库如何封装 JSON-RPC：
 
 ```mermaid
 flowchart LR
-    A[你调用 provider.getBalance addr] --> B[ethers 组装 JSON-RPC 请求]
+    A["你调用 provider.getBalance addr"] --> B[ethers 组装 JSON-RPC 请求]
     B --> C[HTTP POST 到 RPC 端点]
     C --> D[节点返回 hex 结果]
     D --> E[ethers 解析成 BigInt 返回给你]

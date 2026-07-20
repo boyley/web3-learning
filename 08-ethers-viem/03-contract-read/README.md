@@ -24,11 +24,11 @@ const contract = new Contract(地址, ABI, signer);   // 要写方法则用 Sign
 
 ```mermaid
 flowchart LR
-    A[你的代码<br/>weth.symbol] --> B[ethers 用 ABI<br/>编码 calldata]
+    A["你的代码<br/>weth.symbol"] --> B["ethers 用 ABI<br/>编码 calldata"]
     B --> C[Provider 发 eth_call]
-    C --> D[(节点本地执行 EVM<br/>只读, 不出块)]
+    C --> D["(节点本地执行 EVM<br/>只读, 不出块)"]
     D --> E[返回原始 bytes]
-    E --> F[ethers 用 ABI 解码<br/>bytes -> JS 类型]
+    E --> F["ethers 用 ABI 解码<br/>bytes -> JS 类型"]
     F --> G["'WETH' 等结果"]
     style D fill:#e3f2fd
     style G fill:#e8f5e9

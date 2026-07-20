@@ -41,7 +41,7 @@ flowchart TD
       I["connectors: MetaMask/WalletConnect..."]
       J["transports: 每条链的 RPC"]
     end
-    B -.依赖.-> H
+    B-.->|"依赖"| H
 ```
 
 ## 💻 代码说明

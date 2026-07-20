@@ -43,10 +43,10 @@ PoW 挖矿流程：
 
 ```mermaid
 flowchart TD
-    A[打包交易 + 组装区块头] --> B[设 nonce = 0]
-    B --> C[hash = SHA256 区块头 + nonce]
-    C --> D{hash 小于目标值?<br/>即以 N 个 0 开头?}
-    D -->|否| E[nonce = nonce + 1]
+    A[打包交易 + 组装区块头] --> B["设 nonce = 0"]
+    B --> C["hash = SHA256 区块头 + nonce"]
+    C --> D{"hash 小于目标值?<br/>即以 N 个 0 开头?"}
+    D -->|否| E["nonce = nonce + 1"]
     E --> C
     D -->|是| F[✅ 挖矿成功! 广播新区块]
     F --> G[全网节点各算 1 次哈希即可验证]

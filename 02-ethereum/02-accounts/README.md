@@ -39,13 +39,13 @@
 
 ```mermaid
 flowchart TD
-    ROOT[以太坊账户 Account] --> EOA[外部账户 EOA<br/>由私钥控制]
-    ROOT --> CA[合约账户 Contract<br/>由代码控制]
+    ROOT[以太坊账户 Account] --> EOA["外部账户 EOA<br/>由私钥控制"]
+    ROOT --> CA["合约账户 Contract<br/>由代码控制"]
 
     EOA -->|唯一能主动发起交易| TX[一笔交易 Transaction]
     TX -->|转账 ETH| EOA2[另一个 EOA]
     TX -->|调用| CA
-    CA -->|执行代码, 可内部调用| CA2[另一个合约账户]
+    CA -->|"执行代码, 可内部调用"| CA2[另一个合约账户]
 
     subgraph 每个账户的状态字段
         F1[nonce 交易计数]
@@ -59,10 +59,10 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    PK[私钥 private key<br/>256 位随机数] -->|secp256k1 椭圆曲线| PUB[公钥 public key]
+    PK["私钥 private key<br/>256 位随机数"] -->|secp256k1 椭圆曲线| PUB[公钥 public key]
     PUB -->|Keccak-256| HASH[32 字节哈希]
-    HASH -->|取最后 20 字节 + 0x| ADDR[地址 0x... 42 字符]
-    ADDR -.->|EIP-55 大小写校验和| ADDR2[0xAbC... 带校验和地址]
+    HASH -->|取最后 20 字节 + 0x| ADDR["地址 0x... 42 字符"]
+    ADDR -.->|EIP-55 大小写校验和| ADDR2["0xAbC... 带校验和地址"]
 ```
 
 ## 💻 代码说明

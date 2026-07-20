@@ -29,7 +29,7 @@
 
 ```mermaid
 flowchart TD
-    A[01 区块链基础<br/>哈希/区块/共识] --> B[02 以太坊核心<br/>账户/交易/Gas/EVM]
+    A["01 区块链基础<br/>哈希/区块/共识"] --> B["02 以太坊核心<br/>账户/交易/Gas/EVM"]
     B --> C[03 Solidity 合约语言]
     C --> D[04 合约安全]
     C --> E[05 OpenZeppelin 库]
@@ -38,9 +38,9 @@ flowchart TD
     F --> G[07 Hardhat 开发框架]
     G --> H[08 ethers/viem 前端连链]
     H --> I[09 钱包集成 MetaMask]
-    I --> J[10 wagmi + RainbowKit<br/>React dApp]
+    I --> J["10 wagmi + RainbowKit<br/>React dApp"]
     F --> K[11 IPFS 去中心化存储]
-    J --> L[🎯 12 综合实战<br/>NFT 铸造 dApp]
+    J --> L["🎯 12 综合实战<br/>NFT 铸造 dApp"]
     K --> L
 
     style A fill:#e3f2fd

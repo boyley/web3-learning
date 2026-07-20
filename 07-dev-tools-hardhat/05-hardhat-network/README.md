@@ -30,7 +30,7 @@ flowchart TD
     C --> C3["setBalance() 改余额"]
     C --> C4["impersonateAccount() 伪装地址"]
     D["npx hardhat test / run"] -->|临时链| HHN
-    E["npx hardhat node"] -->|常驻 :8545| HHN
+    E["npx hardhat node"] -->|"常驻 :8545"| HHN
     E --> F["MetaMask / 前端 / --network localhost"]
     style HHN fill:#eef
     style C fill:#ffe8cc
