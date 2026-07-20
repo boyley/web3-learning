@@ -14,6 +14,7 @@
 
 | # | 模块 | 一句话 | Demo 形式 | 运行 |
 | --- | --- | --- | --- | --- |
+| 00 | [what-is-web3-dev](./00-what-is-web3-dev/) | 👉 **新手先看**：Web3 开发到底开发什么、技术栈全景、学习路线 | 纯讲解 | 阅读 |
 | 01 | [what-is-blockchain](./01-what-is-blockchain/) | 去中心化、防篡改的共享账本是什么 | `index.html` | 浏览器打开 |
 | 02 | [hash-functions](./02-hash-functions/) | SHA-256 哈希，改一字节指纹全变 | `demo.js` + `index.html` | `node` / 浏览器 |
 | 03 | [blocks-and-chain](./03-blocks-and-chain/) | 区块结构 & prevHash 链式链接（手写迷你链） | `demo.js` | `node demo.js` |
