@@ -6,6 +6,8 @@
 
 ---
 
+> 📚 **新手先看**：[`00-learning-resources.md`](00-learning-resources.md) —— Web3 学习教程清单 + 学习顺序 + 避坑。
+
 ## 一、工程总览
 
 | # | 工程 | 内容 | 权威来源 | 运行方式 |
